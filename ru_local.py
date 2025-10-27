@@ -1,0 +1,5 @@
+INCOME = 'доход'
+EXPENSES = 'расход'
+BALANCE = 'баланс'
+TRANSACTIONS_QUANTITY = 'количество транзакций'
+POPULAR_CATEGORIES = 'частые категории трат'
