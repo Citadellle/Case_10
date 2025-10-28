@@ -132,8 +132,8 @@ def categorize_transaction(description: str, categories: dict) -> str:
     description_lower = description.lower()
       
     for category, keywords in categories.items():
-        if category == "доход":
-            continue
+   '''     if category == "доход":
+            continue '''
         
         for keyword in keywords:
             if keyword in description_lower:
