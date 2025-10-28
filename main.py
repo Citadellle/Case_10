@@ -34,11 +34,58 @@ def create_categories() -> dict:
 
 
 def categorize_transaction(description: str, categories: dict) -> str:
-    pass
+    """
+    Reduce the description to lowercase
+    Check if a keyword is included in the description.  
+    If found, return the category. If you haven't found it, return "другое"
+    """
+    if not description or not isinstance(description, str):
+        return "другое"
+    
+    desc_lower = description.lower()
+    
+    
+    for category, keywords in categories.items():
+        if category == "доход":
+            continue
+        if any(keyword in desc_lower for keyword in keywords):
+            return category
+    
+    return "другое"
+
+
 
 
 def categorize_all_transactions(transactions: list) -> list:
-    pass
+    """
+    Accepts a list of transactions in the format:
+        [ [date, amount, description, type], ... ]
+    
+    Returns: [ [date, amount, description, type, category], ... ]
+    """
+    categories = create_categories()
+    result = []
+    
+    for trans in transactions:
+        if not isinstance(trans, (list, tuple)) or len(trans) < 4:
+            if isinstance(trans, (list, tuple)):
+                result.append(list(trans) + ["ошибка"])
+            else:
+                result.append(["", 0.0, "", "", "ошибка"])
+            continue
+        
+        date, amount, description, trans_type = trans[0], trans[1], trans[2], trans[3]
+        
+        if trans_type == "доход":
+            category = "доход"
+        else:
+            category = categorize_transaction(description, categories)
+        
+        new_transaction = [date, amount, description, trans_type, category]
+        result.append(new_transaction)
+    
+    return result
+
 
 
 
