@@ -43,8 +43,7 @@ def categorize_transaction(description: str, categories: dict) -> str:
         return "другое"
     
     desc_lower = description.lower()
-    
-    
+      
     for category, keywords in categories.items():
         if category == "доход":
             continue
