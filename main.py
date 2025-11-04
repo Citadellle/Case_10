@@ -148,64 +148,79 @@ def import_financial_data(filename: str) -> list:
 
 
 def create_categories() -> dict:
-    """ 
-    Creates a dictionary of categories: the key is the category name, 
+    """
+    Creates a dictionary of categories: the key is the category name,
     The value is a list of keywords.
     """
     return {
-        "еда": ["пятерочка", "магнит", "продукты", "еда", "супермаркет", "добрянка", "мария-ра", "ярче", "мясо", "кондитерская", "пекарня", "овощи", "фрукты",  "окей", "дикси", "ярмарка", "фермер", "лавка", "ресторан", "кафе", "столовая", "закусочная", "кофейня", "пельменная", "шаурма", "чикен", "донер", "лаваш","чайхона"],
-        "транспорт": ["метро", "автобус", "такси", "бензин", "аренда самоката", "ж/д", "билет", "дизель", "газ", "поезд", "электричка", "авиабилет", "аэрофлот", "велосипед", "газель"],
-        "развлечения": ["кино", "атракцион", "выступление", "концерт", "театр", "выставка",  "боулинг", "квест", "игровая",],
-        "здоровье": ["аптека", "врач", "больница", "лекарства", "стоматология", "поликлиника", "анализы",  "стоматология", "зуб", "лечение", "медицин", "диагностика", "инвитро", "хеликс", "лаборатория", "очки", "линзы"],
-        "одежда": ["одежда", "обувь", "wildberries", "ozon", "спортмастер", "zolla", "o'stin", "adidas", "Rieker", "виктор", "lacoste", "brand", "befree", "футболка", "штаны", "носки", "рубашка", "zara", "h&m", "bershka"],
-        "быт": ["хозтовары", "бытовая техника", "мебель",  "порошок", "средство для стирки", "мыло", "шампунь", "гель для душа",  "зубная паста", "щётка", "бритва", "салфетки", "туалетная бумага", "бумага",
-                "губки", "мочалка", "перчатки", "средство для посуды", "средство для унитаза", "освежитель", "аромат","отбеливатель"],
-         "жилье": ["аренда", "квартира", "коммунал", "электроэнергия", "вода", "газ", "отопление", "интернет", "wi-fi", "мтс", "билайн", "мегафон", "домру", "ростелеком", "жкх", "управляющая компания", "ипотека",
-                   "квартплата", "содержание жилья"],
-        "образование": ["курсы", "школа", "университет", "онлайн-курсы", "колледж", "училище", "повышение квалификации", "обучение",  "вебинар", "учебник", "канцелярия", "канцтовары"],
+        "еда": ["пятерочка", "магнит", "продукты", "еда", "супермаркет", "добрянка", "мария-ра", "ярче", "мясо",
+                "кондитерская", "пекарня", "овощи", "фрукты", "окей", "дикси", "ярмарка", "фермер", "лавка"],
+        "транспорт": ["метро", "автобус", "такси", "бензин", "аренда самоката", "ж/д", "билет", "дизель", "газ",
+                      "поезд", "электричка", "авиабилет", "аэрофлот", "велосипед", "газель"],
+        "развлечения": ["кино", "атракцион", "выступление", "концерт", "театр", "выставка", "боулинг", "квест",
+                        "игровая", ],
+        "питание в общественных местах": ["ресторан", "кафе", "столовая", "закусочная", "кофейня", "пельменная",
+                                          "шаурма", "чикен", "донер", "лаваш", "чайхона"],
+        "здоровье": ["аптека", "врач", "больница", "лекарства", "стоматология", "поликлиника", "анализы",
+                     "стоматология", "зуб", "лечение", "медицин", "диагностика", "инвитро", "хеликс", "лаборатория",
+                     "очки", "линзы"],
+        "одежда": ["одежда", "обувь", "wildberries", "ozon", "спортмастер", "zolla", "o'stin", "adidas", "Rieker",
+                   "виктор", "lacoste", "brand", "befree", "футболка", "штаны", "носки", "рубашка", "zara", "h&m",
+                   "bershka"],
+        "быт": ["хозтовары", "бытовая техника", "мебель", "порошок", "средство для стирки", "мыло", "шампунь",
+                "гель для душа", "зубная паста", "щётка", "бритва", "салфетки", "туалетная бумага", "бумага",
+                "губки", "мочалка", "перчатки", "средство для посуды", "средство для унитаза", "освежитель", "аромат",
+                "отбеливатель"],
+        "жильё": ["аренда", "квартира", "коммунал", "электроэнергия", "вода", "газ", "отопление", "интернет", "wi-fi",
+                  "мтс", "билайн", "мегафон", "домру", "ростелеком", "жкх", "управляющая компания", "ипотека",
+                  "квартплата", "содержание жилья"],
+        "образование": ["курсы", "школа", "университет", "онлайн-курсы", "колледж", "училище", "повышение квалификации",
+                        "обучение", "вебинар", "учебник", "канцелярия", "канцтовары"],
         "переводы": ["перевод", "на карту", "qiwi", "сбер", "втб", "альфа", "т-банк", "газпромбанк", "россельхозбанк"]
     }
 
 
 def categorize_transaction(description: str, categories: dict) -> str:
-    """
+    '''
     Reduce the description to lowercase
-    Check if a keyword is included in the description.  
-    If found, return the category. If you haven't found it, return "другое"
-    """    
+    Check if a keyword is included in the description.
+    If found, return the category. If you haven't found it, return 'другое'
+    '''
     description_lower = description.lower()
-      
-    for category, keywords in categories.items():        
-        for keyword in keywords:
-            if keyword in description_lower:
-                return category
+
+    for keyword in categories.items():
+        if keyword in description_lower:
+            return
+    # If code didn't find category.
+    else:
+        return 'другое'
 
 
 def categorize_all_transactions(transactions: list) -> list:
-    """
+    '''
     Accepts a list of transactions in the format:
         [[date, amount, description, type], ... ]
-    
+
     Returns: [[date, amount, description, type, category], ... ]
-    """
+    '''
     categories = create_categories()
     result = []
-    
-    for trans in transactions:       
-        date, amount, description, trans_type = trans[0], trans[1], trans[2], trans[3]
-        if trans_type = 'income':
+
+    # Add in lists of list category item
+    for trans in transactions:
+        date, amount, description, trans_type = (trans[0], trans[1], trans[2],
+                                                 trans[3])
+        if trans_type == 'доход':
             continue
         category = categorize_transaction(description, categories)
-        
+
         new_transaction = [date, amount, description, trans_type, category]
         result.append(new_transaction)
-    
+
     return result
 
 
-
-
-def calculate_basic_stats(transactions_list) -> dict:
+def calculate_basic_stats(transactions_list: list) -> dict:
     '''
     This function calculates the total income and expenses,
     the remaining balance and the number of transactions.
@@ -217,7 +232,7 @@ def calculate_basic_stats(transactions_list) -> dict:
     total_income = 0
     total_expenses = 0
     for transactions in transactions_list:
-        if transactions[3] == 'income':
+        if transactions[3] == ru.INCOME:
             total_income += transactions[1]
         else:
             total_expenses += transactions[1]
@@ -226,13 +241,12 @@ def calculate_basic_stats(transactions_list) -> dict:
 
     transactions_quantity = len(transactions_list)
 
-    info = {'income':total_income,
-            'expense':total_expenses,
-            'balance':balance,
-            'transactions quantity':transactions_quantity}
+    info = {ru.INCOME: total_income,
+            ru.EXPENSES: total_expenses,
+            ru.BALANCE: balance,
+            ru.TRANSACTIONS_QUANTITY: transactions_quantity}
 
     return info
-
 
 
 def sort_by_category(transactions_list) -> dict:
@@ -246,7 +260,7 @@ def sort_by_category(transactions_list) -> dict:
 
     for transactions in transactions_list:
         category = transactions[4]
-        if transactions[3] != 'income':
+        if transactions[3] != ru.INCOME:
             if category in transactions_by_category:
                 transactions_by_category[category].append(transactions)
             else:
@@ -264,7 +278,7 @@ def calculate_by_category(transactions_list) -> dict:
     '''
 
     category_info = {}
-    total_expenses = calculate_basic_stats(transactions_list)['expense']
+    total_expenses = calculate_basic_stats(transactions_list)[ru.EXPENSES]
     trans_by_category = sort_by_category(transactions_list)
 
     for category in trans_by_category:
@@ -283,7 +297,6 @@ def calculate_by_category(transactions_list) -> dict:
     return category_info
 
 
-
 def sort_by_month(transactions_list) -> dict:
     '''
     This function groups transactions into by month
@@ -293,7 +306,7 @@ def sort_by_month(transactions_list) -> dict:
     trans_by_month = {}
 
     for transactions in transactions_list:
-        month_trans = datetime.strptime(transactions[0],'%Y-%m-%d').month
+        month_trans = datetime.strptime(transactions[0], '%Y-%m-%d').month
 
         if month_trans in trans_by_month:
             trans_by_month[month_trans].append(transactions)
@@ -316,8 +329,8 @@ def analyze_by_time(transactions_list) -> dict:
     for month in trans_by_month:
         month_list = trans_by_month[month]
 
-        income = calculate_basic_stats(month_list)['income']
-        expenses = calculate_basic_stats(month_list)['expense']
+        income = calculate_basic_stats(month_list)[ru.INCOME]
+        expenses = calculate_basic_stats(month_list)[ru.EXPENSES]
 
         quantity_category = []
         category_list = []
@@ -336,15 +349,13 @@ def analyze_by_time(transactions_list) -> dict:
             if quantity_category[index_category] == n:
                 popular_categories.append(category_list[index_category])
 
-        info = {'income':income,
-                'expense':expenses,
-                'popular categories':popular_categories}
+        info = {ru.INCOME: income,
+                ru.EXPENSES: expenses,
+                ru.POPULAR_CATEGORIES: popular_categories}
 
         month_info[month] = info
 
     return month_info
-
-
 
 
 def analyze_historical_spending(transactions: list) -> dict:
@@ -592,7 +603,7 @@ def main():
     '''
     
     # 1. Role 1: Importing data.
-    transactions = import_financial_data("test_data.csv")
+    transactions = import_financial_data(import('enter file name -->'))
     
     #2. Role 2: Classify transactions.
     categorized_transactions = categorize_all_transactions(transactions)
