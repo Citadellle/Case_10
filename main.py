@@ -1,4 +1,4 @@
-    import csv
+import csv
 import json
 from datetime import datetime
 from ru_local import *
