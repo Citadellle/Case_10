@@ -1,7 +1,7 @@
 import csv
 import json
 from datetime import datetime
-from ru_local import *
+import ru_local as ru
 
 
 def read_csv_file(filename: str) -> list:
@@ -128,9 +128,9 @@ def import_financial_data(filename: str) -> list:
             inter_list = [dictionary[k_date], float(dictionary[k_amount]),
             translator.translate(dictionary[k_description], dest='ru').text]
             if str(dictionary[k_amount])[0] == '-':
-                inter_list += ['расход']
+                inter_list += ['expense']
             else:
-                inter_list += ['доход']
+                inter_list += ['income']
             exit_list.append(inter_list)
 
     else:
@@ -139,85 +139,70 @@ def import_financial_data(filename: str) -> list:
             inter_list = [dictionary[k_date], float(dictionary[k_amount]),
                           dictionary[k_description]]
             if str(dictionary[k_amount])[0] == '-':
-                inter_list += ['расход']
+                inter_list += ['expense']
             else:
-                inter_list += ['доход']
+                inter_list += ['income']
             exit_list.append(inter_list)
 
     return exit_list
 
 
 def create_categories() -> dict:
-    """
-    Creates a dictionary of categories: the key is the category name,
+    """ 
+    Creates a dictionary of categories: the key is the category name, 
     The value is a list of keywords.
     """
     return {
-        "еда": ["пятерочка", "магнит", "продукты", "еда", "супермаркет", "добрянка", "мария-ра", "ярче", "мясо",
-                "кондитерская", "пекарня", "овощи", "фрукты", "окей", "дикси", "ярмарка", "фермер", "лавка"],
-        "транспорт": ["метро", "автобус", "такси", "бензин", "аренда самоката", "ж/д", "билет", "дизель", "газ",
-                      "поезд", "электричка", "авиабилет", "аэрофлот", "велосипед", "газель"],
-        "развлечения": ["кино", "атракцион", "выступление", "концерт", "театр", "выставка", "боулинг", "квест",
-                        "игровая", ],
-        "питание в общественных местах": ["ресторан", "кафе", "столовая", "закусочная", "кофейня", "пельменная",
-                                          "шаурма", "чикен", "донер", "лаваш", "чайхона"],
-        "здоровье": ["аптека", "врач", "больница", "лекарства", "стоматология", "поликлиника", "анализы",
-                     "стоматология", "зуб", "лечение", "медицин", "диагностика", "инвитро", "хеликс", "лаборатория",
-                     "очки", "линзы"],
-        "одежда": ["одежда", "обувь", "wildberries", "ozon", "спортмастер", "zolla", "o'stin", "adidas", "Rieker",
-                   "виктор", "lacoste", "brand", "befree", "футболка", "штаны", "носки", "рубашка", "zara", "h&m",
-                   "bershka"],
-        "быт": ["хозтовары", "бытовая техника", "мебель", "порошок", "средство для стирки", "мыло", "шампунь",
-                "гель для душа", "зубная паста", "щётка", "бритва", "салфетки", "туалетная бумага", "бумага",
-                "губки", "мочалка", "перчатки", "средство для посуды", "средство для унитаза", "освежитель", "аромат",
-                "отбеливатель"],
-        "жильё": ["аренда", "квартира", "коммунал", "электроэнергия", "вода", "газ", "отопление", "интернет", "wi-fi",
-                  "мтс", "билайн", "мегафон", "домру", "ростелеком", "жкх", "управляющая компания", "ипотека",
-                  "квартплата", "содержание жилья"],
-        "образование": ["курсы", "школа", "университет", "онлайн-курсы", "колледж", "училище", "повышение квалификации",
-                        "обучение", "вебинар", "учебник", "канцелярия", "канцтовары"],
+        "еда": ["пятерочка", "магнит", "продукты", "еда", "супермаркет", "добрянка", "мария-ра", "ярче", "мясо", "кондитерская", "пекарня", "овощи", "фрукты",  "окей", "дикси", "ярмарка", "фермер", "лавка", "ресторан", "кафе", "столовая", "закусочная", "кофейня", "пельменная", "шаурма", "чикен", "донер", "лаваш","чайхона"],
+        "транспорт": ["метро", "автобус", "такси", "бензин", "аренда самоката", "ж/д", "билет", "дизель", "газ", "поезд", "электричка", "авиабилет", "аэрофлот", "велосипед", "газель"],
+        "развлечения": ["кино", "атракцион", "выступление", "концерт", "театр", "выставка",  "боулинг", "квест", "игровая",],
+        "здоровье": ["аптека", "врач", "больница", "лекарства", "стоматология", "поликлиника", "анализы",  "стоматология", "зуб", "лечение", "медицин", "диагностика", "инвитро", "хеликс", "лаборатория", "очки", "линзы"],
+        "одежда": ["одежда", "обувь", "wildberries", "ozon", "спортмастер", "zolla", "o'stin", "adidas", "Rieker", "виктор", "lacoste", "brand", "befree", "футболка", "штаны", "носки", "рубашка", "zara", "h&m", "bershka"],
+        "быт": ["хозтовары", "бытовая техника", "мебель",  "порошок", "средство для стирки", "мыло", "шампунь", "гель для душа",  "зубная паста", "щётка", "бритва", "салфетки", "туалетная бумага", "бумага",
+                "губки", "мочалка", "перчатки", "средство для посуды", "средство для унитаза", "освежитель", "аромат","отбеливатель"],
+         "жилье": ["аренда", "квартира", "коммунал", "электроэнергия", "вода", "газ", "отопление", "интернет", "wi-fi", "мтс", "билайн", "мегафон", "домру", "ростелеком", "жкх", "управляющая компания", "ипотека",
+                   "квартплата", "содержание жилья"],
+        "образование": ["курсы", "школа", "университет", "онлайн-курсы", "колледж", "училище", "повышение квалификации", "обучение",  "вебинар", "учебник", "канцелярия", "канцтовары"],
         "переводы": ["перевод", "на карту", "qiwi", "сбер", "втб", "альфа", "т-банк", "газпромбанк", "россельхозбанк"]
     }
 
 
 def categorize_transaction(description: str, categories: dict) -> str:
-    '''
+    """
     Reduce the description to lowercase
-    Check if a keyword is included in the description.
-    If found, return the category. If you haven't found it, return 'другое'
-    '''
+    Check if a keyword is included in the description.  
+    If found, return the category. If you haven't found it, return "другое"
+    """    
     description_lower = description.lower()
-
-    for keyword in categories.items():
-        if keyword in description_lower:
-            return
-    # If code didn't find category.
-    else:
-        return 'другое'
+      
+    for category, keywords in categories.items():        
+        for keyword in keywords:
+            if keyword in description_lower:
+                return category
 
 
 def categorize_all_transactions(transactions: list) -> list:
-    '''
+    """
     Accepts a list of transactions in the format:
         [[date, amount, description, type], ... ]
-
+    
     Returns: [[date, amount, description, type, category], ... ]
-    '''
+    """
     categories = create_categories()
     result = []
-
-    # Add in lists of list category item
-    for trans in transactions:
-        date, amount, description, trans_type = (trans[0], trans[1], trans[2],
-                                                 trans[3])
-        if trans_type == 'доход':
+    
+    for trans in transactions:       
+        date, amount, description, trans_type = trans[0], trans[1], trans[2], trans[3]
+        if trans_type = 'income':
             continue
         category = categorize_transaction(description, categories)
-
+        
         new_transaction = [date, amount, description, trans_type, category]
         result.append(new_transaction)
-
+    
     return result
+
+
 
 
 def calculate_basic_stats(transactions_list) -> dict:
@@ -232,7 +217,7 @@ def calculate_basic_stats(transactions_list) -> dict:
     total_income = 0
     total_expenses = 0
     for transactions in transactions_list:
-        if transactions[3] == INCOME:
+        if transactions[3] == 'income':
             total_income += transactions[1]
         else:
             total_expenses += transactions[1]
@@ -241,10 +226,10 @@ def calculate_basic_stats(transactions_list) -> dict:
 
     transactions_quantity = len(transactions_list)
 
-    info = {INCOME:total_income,
-            EXPENSES:total_expenses,
-            BALANCE:balance,
-            TRANSACTIONS_QUANTITY:transactions_quantity}
+    info = {'income':total_income,
+            'expense':total_expenses,
+            'balance':balance,
+            'transactions quantity':transactions_quantity}
 
     return info
 
@@ -261,7 +246,7 @@ def sort_by_category(transactions_list) -> dict:
 
     for transactions in transactions_list:
         category = transactions[4]
-        if transactions[3] != INCOME:
+        if transactions[3] != 'income':
             if category in transactions_by_category:
                 transactions_by_category[category].append(transactions)
             else:
@@ -279,7 +264,7 @@ def calculate_by_category(transactions_list) -> dict:
     '''
 
     category_info = {}
-    total_expenses = calculate_basic_stats(transactions_list)[EXPENSES]
+    total_expenses = calculate_basic_stats(transactions_list)['expense']
     trans_by_category = sort_by_category(transactions_list)
 
     for category in trans_by_category:
@@ -331,8 +316,8 @@ def analyze_by_time(transactions_list) -> dict:
     for month in trans_by_month:
         month_list = trans_by_month[month]
 
-        income = calculate_basic_stats(month_list)[INCOME]
-        expenses = calculate_basic_stats(month_list)[EXPENSES]
+        income = calculate_basic_stats(month_list)['income']
+        expenses = calculate_basic_stats(month_list)['expense']
 
         quantity_category = []
         category_list = []
@@ -351,9 +336,9 @@ def analyze_by_time(transactions_list) -> dict:
             if quantity_category[index_category] == n:
                 popular_categories.append(category_list[index_category])
 
-        info = {INCOME:income,
-                EXPENSES:expenses,
-                POPULAR_CATEGORIES:popular_categories}
+        info = {'income':income,
+                'expense':expenses,
+                'popular categories':popular_categories}
 
         month_info[month] = info
 
@@ -376,7 +361,7 @@ def analyze_historical_spending(transactions: list) -> dict:
             expense = transaction[1]
             transaction_type = transaction[3]
 
-            if transaction_type == EXPENSE:
+            if transaction_type == 'expense':
                 if category in expenses_month_for_category:
                     expenses_month_for_category[category] += expense
                 else:
@@ -421,43 +406,43 @@ def analyze_historical_spending(transactions: list) -> dict:
         
 
     seasons = {
-        'Зима': [12, 1, 2],
-        'Весна': [3, 4, 5],
-        'Лето': [6, 7, 8],
-        'Осень': [9, 10, 11]
+        'winter': [12, 1, 2],
+        'spring': [3, 4, 5],
+        'summer': [6, 7, 8],
+        'autumn': [9, 10, 11]
     }
 
     seasonal_data = {}
     i = 0
     for expense_by_month in expenses_by_month:
         i += 1
-        if i in seasons['Зима']:
-            if 'Зима' in seasonal_data:
-                seasonal_data['Зима'] += expense_by_month
+        if i in seasons['winter']:
+            if 'winter' in seasonal_data:
+                seasonal_data['winter'] += expense_by_month
             else:
-                seasonal_data['Зима'] = expense_by_month
-        elif i in seasons['Весна']:
-            if 'Весна' in seasonal_data:
-                seasonal_data['Весна'] += expense_by_month
+                seasonal_data['winter'] = expense_by_month
+        elif i in seasons['spring']:
+            if 'spring' in seasonal_data:
+                seasonal_data['spring'] += expense_by_month
             else:
-                seasonal_data['Весна'] = expense_by_month
-        elif i in seasons['Лето']:
-            if 'Лето' in seasonal_data:
-                seasonal_data['Лето'] += expense_by_month
+                seasonal_data['spring'] = expense_by_month
+        elif i in seasons['summer']:
+            if 'summer' in seasonal_data:
+                seasonal_data['summer'] += expense_by_month
             else:
-                seasonal_data['Лето'] = expense_by_month
+                seasonal_data['summer'] = expense_by_month
         else:
-            if 'Осень' in seasonal_data:
-                seasonal_data['Осень'] += expense_by_month
+            if 'autumn' in seasonal_data:
+                seasonal_data['autumn'] += expense_by_month
             else:
-                seasonal_data['Осень'] = expense_by_month
+                seasonal_data['autumn'] = expense_by_month
 
     seasonal_data_sorted = sorted(seasonal_data.items(),
                                   key= lambda i: i[1])
     max_exp, max_exp_name = seasonal_data_sorted[-1][1], seasonal_data_sorted[-1][0]
     min_exp, min_exp_name = seasonal_data_sorted[0][1], seasonal_data_sorted[0][0]
-    seasonal_patterns = (f'Наибольшие затраты наблюдаются в сезон {max_exp_name} и равны {max_exp}',
-                         f'Наименьшие затраты наблюдаются в сезон {min_exp_name} и равны {min_exp}')
+    seasonal_patterns = (f'{ru.pr_season_pat_high_costs} {max_exp_name} {ru.pr_season_pat_equal} {max_exp}',
+                         f'{ru.pr_season_pat_small_costs} {min_exp_name} {ru.pr_season_pat_equal} {min_exp}')
 
 
     max_exp_category = expenses_per_category_sorted[0]
@@ -465,26 +450,26 @@ def analyze_historical_spending(transactions: list) -> dict:
     recommended_decrease = ((max_exp_category[1] - several_exp_category[1]) \
                             / max_exp_category[1]) * 100
 
-    recommendations_for_planning = (f'Попробуйте сократить траты на {max_exp_category[0]} ' \
-                                    f'на {round(recommended_decrease, 2)}%')
+    recommendations_for_planning = (f'{ru.PR_RECOMMEND_PLAN} {max_exp_category[0]} ' \
+                                    f'{ru.BY} {round(recommended_decrease, 2)}%')
 
     return {
-        'cредние затраты' : average_expenses_by_category_per_month,
-        'cезонные закономерности' : seasonal_patterns,
-        'cамые большие траты' : top_3_category,
-        'рекомендации' : recommendations_for_planning,
-        'данные о категориях по месяцам' : months_data
+        'average costs' : average_expenses_by_category_per_month,
+        'seasonal patterns' : seasonal_patterns,
+        'biggest expenses' : top_3_category,
+        'recommendations' : recommendations_for_planning,
+        'category data by month' : months_data
             }
 
 
 def create_budget_template(time_stats: dict, analysis: dict) -> dict:
-    months_data = analysis['данные о категориях по месяцам']
+    months_data = analysis['category data by month']
 
     saving_dict = {}
     for month in time_stats:
         info_month = time_stats[month]
-        income = info_month[INCOME]
-        expense = info_month[EXPENSE]
+        income = info_month['income']
+        expense = info_month['expense']
         saving = income - expense
 
         saving_dict[month] = saving
@@ -533,48 +518,49 @@ def print_report(stats: list,
     Beautiful design and print of analyzed data.
     '''
 
-    print('=== ФИНАНСОВЫЙ ОТЧЕТ ===')
+    print(ru.PR_FINANCIAL_REPORT)
 
-    print('ОСНОВНЫЕ ПОКАЗАТЕЛИ:',
-          f'💰 Доходы: {stats[INCOME]} руб.',
-          f'💸 Расходы: {stats[EXPENSE]} руб.',
-          f'⚖️ Баланс: {stats[BALANCE]} руб.',
-          f'Количество транзакций за год: {stats[TRANSACTIONS_QUANTITY]}',
+    print(ru.PR_KEY_INDICATORS,
+          f'{ru.PR_INCOME} {stats['income']} {ru.PR_RUB}',
+          f'{ru.PR_EXPENSE}: {stats['expense']} {ru.PR_RUB}',
+          f'{ru.PR_BALANCE} {stats['balance']} {ru.PR_RUB}',
+          f'{ru.PR_NUM_TRANS} {stats['transactions quantity']}',
           sep = '\n')
     
-    print('РАСХОДЫ ПО КАТЕГОРИЯМ:')
+    print(ru.PR_CATEGORY_EXPENSES)
     for category in category_stats:
-        print(f'Категория {category}')
-        print(f'Расходы: {category_stats[category][0]}',
-              f'Количество транзакций: {category_stats[category][1]}',
-              f'Процент от общих расходов: {category_stats[category][2]}' ,
-              sep = '\n')
+        print(f'{ru.PR_CATEGORY} {category}')
+        print(f'{ru.PR_EXPENSES}: {category_stats[category][0]}',
+              f'{ru.PR_TRANSACTION_COUNT}: {category_stats[category][1]}',
+              f'{ru.PR_PERCENT_OF_TOTAL}: {category_stats[category][2]}',
+              sep='\n')
         
-    print('РАСХОДЫ ПО МЕСЯЦАМ:')
+    print(ru.PR_MONTHLY_EXPENSES)
     for month in time_stats:
-        print(f'Месяц {month}')
-        print(f'Доходы: {time_stats[month][INCOME]}',
-              f'Расходы: {time_stats[month][EXPENSE]}',
-              f'Самые частые категории трат: {time_stats[month][POPULAR_CATEGORIES]}' ,
-              sep = '\n')
+        print(f'{ru.PR_MONTH} {month}')
+        print(f'{ru.PR_INCOME}: {time_stats[month]['income']}',
+              f'{ru.PR_EXPENSES}: {time_stats[month]['expense']}',
+              f'{ru.PR_POPULAR_CATEGORIES}: {time_stats[month]['popular categories']}',
+              sep='\n')
     
-    print('АНАЛИЗ ИСТОРИЧЕСКИХ ДАННЫХ')
-    print(f'Средние затраты по категориям, за месяц: {analysis['cредние затраты']}',
-          f'Сезонные закономерности: {analysis['cезонные закономерности']}',
-          f'Самые большие траты в категориях: {analysis['cамые большие траты']}',
-          f'Рекомендации для планирования: {analysis['рекомендации']}',
-          sep = '\n')
+    print(ru.PR_HISTORICAL_ANALYSIS)
+    print(f'{ru.PR_AVERAGE_COSTS}: {analysis['average costs']}',
+          f'{ru.PR_SEASONAL_PATTERNS}: {analysis['seasonal patterns']}',
+          f'{ru.PR_BIGGEST_EXPENSES}: {analysis['biggest expenses']}',
+          f'{ru.PR_RECOMMENDATIONS}: {analysis['recommendations']}',
+          sep='\n')
 
-    print('БЮДЖЕТ')
-    print('Вам предлагается следующее бюджетное распределение, в соответствии с потребностями современного человека:',
-          '50% - жилье, коммунальные платежи, продукты, транспорт, здоровье',
-          '30% - развлечения, хобби, одежда, образование',
-          '20% - сбережения',
-          sep = '\n')
+    print(ru.PR_BUDGET,
+      ru.PR_BUDGET_DISTRIBUTION,
+      ru.PR_BUDGET_ESSENTIALS,
+      ru.PR_BUDGET_LIFESTYLE,
+      ru.PR_BUDGET_SAVINGS,
+      sep='\n')
+                     
     if budget:
-        print('✅ Отлично! Вы укладываетесь в бюджет')
-    else:
-        print('❌ К сожалению, Вы не усложись в бюджет')
+    print(ru.PR_BUDGET_SUCCESS)
+else:
+    print(ru.PR_BUDGET_FAILURE)
 
 
 
