@@ -1,4 +1,4 @@
-import csv
+    import csv
 import json
 from datetime import datetime
 from ru_local import *
@@ -411,7 +411,7 @@ def analyze_historical_spending(transactions: list) -> dict:
 
 
     max_exp_category = expenses_per_category_sorted[0]
-    several_exp_category = expenses_per_category_sorted[len(expenses_per_category_sorted)//3]
+    several_exp_category = expenses_per_category_sorted[len(expenses_per_category_sorted)//2]
     recommended_decrease = ((max_exp_category[1] - several_exp_category[1]) \
                             / max_exp_category[1]) * 100
 
@@ -430,21 +430,27 @@ def analyze_historical_spending(transactions: list) -> dict:
 def create_budget_template(time_stats: dict, analysis: dict) -> dict:
     months_data = analysis['данные о категориях по месяцам']
 
-    saving = {}
+    saving_dict = {}
     for month in time_stats:
         info_month = time_stats[month]
         income = info_month[INCOME]
         expense = info_month[EXPENSE]
         saving = income - expense
 
-        saving[month] = saving
+        saving_dict[month] = saving
     
     budget_allocation_percentage = {1: 0, 2: 0, 3: 0}
     for month in months_data:
         month_data = months_data[month]
-        budget_allocation_percentage[1] += month_data['жилье'] + month_data['быт'] + month_data['еда'] + month_data['транспорт'] + month_data['здоровье']
-        budget_allocation_percentage[2] += month_data['развлечения'] + month_data['хобби'] + month_data['одежда'] + month_data['Образование']
-        budget_allocation_percentage[3] += saving[month]
+        
+        for category in month_data:
+            data = month_data[category]
+            if category in ['жилье', 'быт', 'еда', 'транспорт', 'здоровье']:
+                budget_allocation_percentage[1] += data
+            if category in ['развлечения', 'одежда', 'образование']:
+                budget_allocation_percentage[2] += data
+
+        budget_allocation_percentage[3] += saving_dict[month]
     
     return budget_allocation_percentage    
 
@@ -466,7 +472,6 @@ def compare_budget_vs_actual(budget: dict) -> bool:
         error = True
 
     return error
-
 
 def print_report(stats: list, 
                  category_stats: list,
