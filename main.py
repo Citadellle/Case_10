@@ -5,51 +5,85 @@ from ru_local import *
 
 
 def read_csv_file(filename: str) -> list:
+    import csv
     '''
-    # 1. Открыть файл с помощью встроенной функции open()
-    # 2. Прочитать все строки
-    # 3. Разделить каждую строку на части по запятым
-    # 4. Преобразовать в удобный формат (список словарей)
-    # 5. Вернуть данные
+    Function:
+    1. Opens a file using the built-in open function
+    2. Reads all lines
+    3. Splits each line into parts by commas
+    4. Converts it to a list of dictionaries and returns the data
+    5. Checks the data for correctness
 
     errors:
     FileNotFoundError
     if split(filename, sep='.')[-1] != 'csv'
 
+    check:
+    right data format - list of dictionaries
     '''
     try:
-        with open(filename, mode='r', encoding= 'utf-8') as file:
+        with (open(filename, mode='r') as file):
+            # Check on correct file extension.
             if filename.split(sep='.')[-1] != 'csv':
                 return ['File is not csv']
             csv_reader = csv.DictReader(file)
-            return [lines for lines in csv_reader]
+            result = [lines for lines in csv_reader]
+
+            # Check on correctness.
+            if not isinstance(result, list) or not all(isinstance(item, dict)
+                                                       for item in result):
+                return ['Invalid data format: expected list of dictionaries']
+
+            return result
+    # In case incorrect name.
     except FileNotFoundError:
         return ['File is not found']
 
 
 def read_json_file(filename: str) -> list:
+    import json
     '''
-    # 1. Импортировать модуль json
-    # 2. Прочитать файл
-    # 3. Использовать json.load() для преобразования
-    # 4. Вернуть данные
+    Function:
+    1. Imports the json module
+    2. Reads a file
+    3. Use json.load() to convert
+    4. Returns a list of dictionaries
+    
+    errors:
+    FileNotFoundError
+    if split(filename, sep='.')[-1] != 'json'
+
+    check:
+    right data format - list of dictionaries
     '''
     try:
-        with open(filename, mode='r', encoding= 'utf-8') as file:
+        with open(filename, mode='r') as file:
             if filename.split(sep='.')[-1] != 'json':
                 return ['File is not json']
             json_reader = json.load(file)
-        return list(json_reader['data'])
+            result = list(json_reader['data'])
+
+            # Check on correctness.
+            if not isinstance(result, list) or not all(isinstance(item, dict)
+                                                       for item in result):
+                return ['Invalid data format: expected list of dictionaries']
+
+            return result
+
+    # In case incorrect name.
     except FileNotFoundError:
         return ['File is not found']
 
 
 def import_financial_data(filename: str) -> list:
+    import tqdm
+    from googletrans import Translator
     '''
-    # 1. Определить тип файла по расширению (.csv или .json)
-    # 2. Вызвать соответствующую функцию чтения
-    # 3. Проверить, что данные имеют правильную структуру
-    # 4. Вернуть список транзакций в ЕДИНОМ ФОРМАТЕ (Формат - список списков)
+    Function:
+    1. Determine the file type by extension (.csv or .json)
+    2. Call the appropriate read function
+    3. Check that the data has the correct structure
+    4. Return a list of transactions in a list of lists format
 
         "date": "2024-01-15",
         "amount": -1500.50,
@@ -69,15 +103,12 @@ def import_financial_data(filename: str) -> list:
     else:
         return ['unknown data format']
 
-    #if read_data[0] is not dict:
-    #    return ['incorrect data format', type(read_data[0])]
-
-    # Создаем пустые переменные для ключей
+    # Create empty variables for keys.
     k_amount = ''
     k_date = ''
     k_description = ''
-    k_type = ''
-    # Бегаем по первому элементу словаря, находим нужные нам ключи
+    # We run through the first element of the dictionary,
+    # finding the keys we need.
     for need_keys in read_data[0].keys():
         if 'amount' in need_keys:
             k_amount = need_keys
@@ -85,21 +116,35 @@ def import_financial_data(filename: str) -> list:
             k_date = need_keys
         if 'description' in need_keys:
             k_description = need_keys
-        if 'type' in need_keys:
-            k_type = need_keys
 
-    #Проверка на отсутствие ключей
-    #if k_type or k_date or k_category or k_amount == '':
-    #    return ['data is not full', fr'keys {read_data[0].keys}']
-
-    # Цикл для формирования списков списков
+    # Loop for generating lists of lists.
     exit_list = []
-    for dictionary in read_data:
-        inter_list = [dictionary[k_date], float(dictionary[k_amount]), dictionary[k_description], dictionary[k_type]]
-        exit_list.append(inter_list)
+    # Language check. If it's English, we translate it on Russian.
+    # Need to initialize an instance of Translator.
+    translator = Translator()
+    if translator.detect(read_data[0][k_description]).lang != 'ru':
+        # Use tqdm for printing status bar.
+        for dictionary in tqdm.tqdm(read_data):
+            inter_list = [dictionary[k_date], float(dictionary[k_amount]),
+            translator.translate(dictionary[k_description], dest='ru').text]
+            if str(dictionary[k_amount])[0] == '-':
+                inter_list += ['расход']
+            else:
+                inter_list += ['доход']
+            exit_list.append(inter_list)
+
+    else:
+        # Use tqdm for printing status bar.
+        for dictionary in tqdm.tqdm(read_data):
+            inter_list = [dictionary[k_date], float(dictionary[k_amount]),
+                          dictionary[k_description]]
+            if str(dictionary[k_amount])[0] == '-':
+                inter_list += ['расход']
+            else:
+                inter_list += ['доход']
+            exit_list.append(inter_list)
+
     return exit_list
-
-
 
 
 def create_categories() -> dict:
