@@ -314,31 +314,33 @@ def analyze_by_time(transactions_list) -> dict:
 
 def analyze_historical_spending(transactions: list) -> dict:
     trans_by_month = sort_by_month(transactions)
-    months_data = []
+    months_data = {}
 
     for month_number in trans_by_month:
-        month = trans_by_month[month_number]
+        month_data = trans_by_month[month_number]
 
         expenses_month_for_category = {}
 
-        for transaction in month:
+        for transaction in month_data:
             category = transaction[4]
             expense = transaction[1]
             transaction_type = transaction[3]
 
-            if transaction_type == 'расход':
+            if transaction_type == EXPENSE:
                 if category in expenses_month_for_category:
                     expenses_month_for_category[category] += expense
                 else:
                     expenses_month_for_category[category] = expense
         
-        months_data.append(expenses_month_for_category)
+        months_data[month_number] = expenses_month_for_category
 
 
     expenses_per_category = {}
     for month in months_data:
-        for category in month:
-            expense_by_category = month[category]
+        month_data = months_data[month]
+
+        for category in month_data:
+            expense_by_category = month_data[category]
 
             if category in expenses_per_category:
                 expenses_per_category[category] += expense_by_category
@@ -355,16 +357,17 @@ def analyze_historical_spending(transactions: list) -> dict:
     expenses_per_category_sorted = sorted(expenses_per_category.items(),
                                           key= lambda i: i[1],
                                           reverse= True)
-    top_3_category_with_biggest_expenses = []
+    top_3_category = []
     for i in range(3):
-        top_3_category_with_biggest_expenses.append(expenses_per_category_sorted[i][0])
+        top_3_category.append(expenses_per_category_sorted[i][0])
     
 
 
-    expense_by_month = []
+    expenses_by_month = []
     for month in months_data:
-        expenses_per_month = sum(list(month.values()))
-        expense_by_month.append(expenses_per_month)
+        month_data = months_data[month]
+        expense_per_month = sum(list(month_data.values()))
+        expenses_by_month.append(expense_per_month)
         
 
     seasons = {
@@ -376,7 +379,7 @@ def analyze_historical_spending(transactions: list) -> dict:
 
     seasonal_data = {}
     i = 0
-    for expense_by_month in expense_by_month:
+    for expense_by_month in expenses_by_month:
         i += 1
         if i in seasons['Зима']:
             if 'Зима' in seasonal_data:
@@ -418,90 +421,153 @@ def analyze_historical_spending(transactions: list) -> dict:
     return {
         'cредние затраты' : average_expenses_by_category_per_month,
         'cезонные закономерности' : seasonal_patterns,
-        'cамые большие траты' : top_3_category_with_biggest_expenses,
-        'рекомендации' : recommendations_for_planning
+        'cамые большие траты' : top_3_category,
+        'рекомендации' : recommendations_for_planning,
+        'данные о категориях по месяцам' : months_data
             }
 
 
-def create_budget_template(analysis: dict) -> dict:
-    savings = {}
-    for month in analysis:
-        info_month = analysis[month]
+def create_budget_template(time_stats: dict, analysis: dict) -> dict:
+    months_data = analysis['данные о категориях по месяцам']
+
+    saving = {}
+    for month in time_stats:
+        info_month = time_stats[month]
         income = info_month[INCOME]
-        expense = info_month[EXPENSES]
+        expense = info_month[EXPENSE]
         saving = income - expense
 
-        savings[month] = saving
-
-    return savings
-
-
-def compare_budget_vs_actual(budget: dict) -> list:
-    report = {}
-    budget_compliance = True
-    for month in budget:
-        saving_month = budget[month]
-
-        if saving_month < 0:
-            report[month] = abs(saving_month)
-            budget_compliance = False
+        saving[month] = saving
     
-    return list(report, budget_compliance)
+    budget_allocation_percentage = {1: 0, 2: 0, 3: 0}
+    for month in months_data:
+        month_data = months_data[month]
+        budget_allocation_percentage[1] += month_data['жилье'] + month_data['быт'] + month_data['еда'] + month_data['транспорт'] + month_data['здоровье']
+        budget_allocation_percentage[2] += month_data['развлечения'] + month_data['хобби'] + month_data['одежда'] + month_data['Образование']
+        budget_allocation_percentage[3] += saving[month]
+    
+    return budget_allocation_percentage    
 
 
-def print_report(stats: list, category_stats: list, analysis: dict, budget: dict) -> None:
+def compare_budget_vs_actual(budget: dict) -> bool:
+    # The dictionary that adds the months in which the budget was exceeded.
+    amount = sum(budget)
+    shares = {}
+    error = False
+
+    for i in budget:
+        shares[i] = round(budget[i] / amount, 2) * 100
+    
+    if shares[1] not in [i for i in range(45, 56)]:
+        error = True
+    if shares[2] not in [i for i in range(25, 36)]:
+        error = True
+    if shares[3] not in [i for i in range(15, 25)]:
+        error = True
+
+    return error
+
+
+def print_report(stats: list, 
+                 category_stats: list,
+                 time_stats: list,
+                 analysis: dict, 
+                 budget: dict
+                 ) -> None:
+    '''
+    Beautiful design and print of analyzed data.
+    '''
+
     print('=== ФИНАНСОВЫЙ ОТЧЕТ ===')
 
     print('ОСНОВНЫЕ ПОКАЗАТЕЛИ:',
           f'💰 Доходы: {stats[INCOME]} руб.',
-          f'💸 Расходы: {stats[EXPENSES]} руб.',
+          f'💸 Расходы: {stats[EXPENSE]} руб.',
           f'⚖️ Баланс: {stats[BALANCE]} руб.',
           f'Количество транзакций за год: {stats[TRANSACTIONS_QUANTITY]}',
           sep = '\n')
     
-    print('РАСХОДЫ ПО КАТЕГОРИЯМ:',
-          '',
-          '',
-          '',
-          '',
-          sep = '\n')
+    print('РАСХОДЫ ПО КАТЕГОРИЯМ:')
+    for category in category_stats:
+        print(f'Категория {category}')
+        print(f'Расходы: {category_stats[category][0]}',
+              f'Количество транзакций: {category_stats[category][1]}',
+              f'Процент от общих расходов: {category_stats[category][2]}' ,
+              sep = '\n')
+        
+    print('РАСХОДЫ ПО МЕСЯЦАМ:')
+    for month in time_stats:
+        print(f'Месяц {month}')
+        print(f'Доходы: {time_stats[month][INCOME]}',
+              f'Расходы: {time_stats[month][EXPENSE]}',
+              f'Самые частые категории трат: {time_stats[month][POPULAR_CATEGORIES]}' ,
+              sep = '\n')
     
+    print('АНАЛИЗ ИСТОРИЧЕСКИХ ДАННЫХ')
     print(f'Средние затраты по категориям, за месяц: {analysis['cредние затраты']}',
           f'Сезонные закономерности: {analysis['cезонные закономерности']}',
           f'Самые большие траты в категориях: {analysis['cамые большие траты']}',
           f'Рекомендации для планирования: {analysis['рекомендации']}',
           sep = '\n')
 
-    if budget[1]:
+    print('БЮДЖЕТ')
+    print('Вам предлагается следующее бюджетное распределение, в соответствии с потребностями современного человека:',
+          '50% - жилье, коммунальные платежи, продукты, транспорт, здоровье',
+          '30% - развлечения, хобби, одежда, образование',
+          '20% - сбережения',
+          sep = '\n')
+    if budget:
         print('✅ Отлично! Вы укладываетесь в бюджет')
     else:
-        print('❌ К сожалению, Вы не усложись в бюджет...')
-        print('Номера месяцев, в которые Вы не уложились в бюджет:')
-        for month in budget[0]:
-            print(f'{month} месяц, превышение бюджета \
-                   в размере {budget[0][month]} руб.')
+        print('❌ К сожалению, Вы не усложись в бюджет')
 
 
 
 def main():
-    # 1. Роль 1: Импортируем данные.
+    '''
+    The main function of the program is the accounting of income, expenses, analysis and budget planning.
+    
+    The function performs a sequence of actions according to 4 roles:
+    1. Imports the data file and brings it to a format convenient for processing
+    2. Processes the received data and assigns a category to each expense transaction
+    3. Performs basic data analysis: total income, total expenses, balance, number of transactions. Detailed analysis by month and category.
+    4. Performs a detailed analysis of the data: average expenses, seasonal patterns, categories with the largest expenses. Output of recommendations for the user. Calculation of the recommended budget.
+    
+    
+    Functions used:
+    - import_financial_data(): importing data and converting it to a format convenient for processing.
+    
+    - categorize_all_transactions(): Transaction analysis and categorization.
+    
+    - calculate_basic_stats(): calculation of total income, total expense, balance, number of transactions.
+    - calculate_by_category(): Calculates the amount of expenses, the number of transactions, and the percentage of total expenses for each category.
+    - analyze_by_time(): Calculates the amount of expenses, the number of transactions, and the percentage of total expenses for each month.
+    
+    - analyze_historical_spending(): calculation of average monthly expenses, identification of seasonal patterns, identification of 3 categories with the largest expenses, return of recommendations for planning.
+    - create_budget_template(): calculating and returning savings, returning the budget template.
+    - compare_budget_vs_actual(): determination of user satisfaction in the budget and return of data on penalties to the budget.
+    
+    - print_report(): beautiful design and return of analyzed data.
+    '''
+    
+    # 1. Role 1: Importing data.
     transactions = import_financial_data("test_data.csv")
     
-    # 2. Роль 2: Классифицируем транзакции. 
+    #2. Role 2: Classify transactions.
     categorized_transactions = categorize_all_transactions(transactions)
     
-    # 3. Роль 3: Анализируем статистику.
+    # 3. Role 3: Analyzing statistics.
     stats = calculate_basic_stats(categorized_transactions)
     category_stats = calculate_by_category(categorized_transactions)
     time_stats = analyze_by_time(categorized_transactions)
     
-    #4. Роль 4: Планируем бюджет.
+    #4. Role 4: Budget planning.
     analysis = analyze_historical_spending(categorized_transactions)
-    budget = create_budget_template(time_stats)
+    budget = create_budget_template(time_stats, analysis)
     report_budget = compare_budget_vs_actual(budget)
 
-    #Выводим результаты.
-    print_report(stats, category_stats, analysis, report_budget)
+    #We display the results.
+    print_report(stats, category_stats, time_stats, analysis, report_budget)
 
 
 if __name__ == '__main__':
