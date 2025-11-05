@@ -147,8 +147,6 @@ def create_categories() -> dict:
                       "аэрофлот", "велосипед", "газель"],
         "развлечения": ["кино", "атракцион", "выступление", "концерт", "театр", "выставка",
                         "боулинг", "квест", "игровая", ],
-        "питание в общественных местах": ["ресторан", "кафе", "столовая", "закусочная",
-                    "кофейня", "пельменная","шаурма", "чикен", "донер", "лаваш", "чайхона"],
         "здоровье": ["аптека", "врач", "больница", "лекарства", "стоматология", 
                      "поликлиника", "анализы", "стоматология", "зуб", "лечение", "медицин",
                      "диагностика", "инвитро", "хеликс", "лаборатория",  "очки", "линзы"],
@@ -455,8 +453,8 @@ def analyze_historical_spending(transactions: list) -> dict:
                                   key= lambda i: i[1])
     max_exp, max_exp_name = seasonal_data_sorted[-1][1], seasonal_data_sorted[-1][0]
     min_exp, min_exp_name = seasonal_data_sorted[0][1], seasonal_data_sorted[0][0]
-    seasonal_patterns = (f'{ru.pr_season_pat_high_costs} {max_exp_name} {ru.pr_season_pat_equal} {max_exp}',
-                         f'{ru.pr_season_pat_small_costs} {min_exp_name} {ru.pr_season_pat_equal} {min_exp}')
+    seasonal_patterns = (f'{ru.PR_SEASON_PAT_HIGH_COSTS} {max_exp_name} {ru.PR_SEASON_PAT_EQUAL} {max_exp}',
+                         f'{ru.PR_SEASON_PAT_SMALL_COSTS} {min_exp_name} {ru.PR_SEASON_PAT_EQUAL} {min_exp}')
 
 
     max_exp_category = expenses_per_category_sorted[0]
@@ -465,7 +463,7 @@ def analyze_historical_spending(transactions: list) -> dict:
                             / max_exp_category[1]) * 100
 
     recommendations_for_planning = (f'{ru.PR_RECOMMEND_PLAN} {max_exp_category[0]} ' \
-                                    f'{ru.BY} {round(recommended_decrease, 2)}%')
+                                    f'{ru.PR_BY} {round(recommended_decrease, 2)}%')
 
     return {
         'average costs' : average_expenses_by_category_per_month,
@@ -495,8 +493,8 @@ def create_budget_template(time_stats: dict, analysis: dict) -> dict:
     saving_dict = {}
     for month in time_stats:
         info_month = time_stats[month]
-        income = info_month['income']
-        expense = info_month[ru.INCOME]
+        income = info_month[ru.INCOME]
+        expense = info_month[ru.EXPENSE]
         saving = income - expense
 
         saving_dict[month] = saving
