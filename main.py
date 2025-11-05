@@ -7,6 +7,7 @@ import ru_local as ru
 
 
 def read_csv_file(filename: str) -> list:
+    import csv
     '''
     Function:
     1. Opens a file using the built-in open function
@@ -23,7 +24,7 @@ def read_csv_file(filename: str) -> list:
     right data format - list of dictionaries
     '''
     try:
-        with (open(filename, mode='r') as file):
+        with (open(filename, mode='r', encoding='UTF-8') as file):
             # Check on correct file extension.
             if filename.split(sep='.')[-1] != 'csv':
                 return ['File is not csv']
@@ -42,6 +43,7 @@ def read_csv_file(filename: str) -> list:
 
 
 def read_json_file(filename: str) -> list:
+    import json
     '''
     Function:
     1. Imports the json module
@@ -57,7 +59,7 @@ def read_json_file(filename: str) -> list:
     right data format - list of dictionaries
     '''
     try:
-        with open(filename, mode='r') as file:
+        with open(filename, mode='r', encoding='UTF-8') as file:
             if filename.split(sep='.')[-1] != 'json':
                 return ['File is not json']
             json_reader = json.load(file)
@@ -76,6 +78,8 @@ def read_json_file(filename: str) -> list:
 
 
 def import_financial_data(filename: str) -> list:
+    import tqdm
+    from googletrans import Translator
     '''
     Function:
     1. Determine the file type by extension (.csv or .json)
@@ -126,9 +130,9 @@ def import_financial_data(filename: str) -> list:
             inter_list = [dictionary[k_date], float(dictionary[k_amount]),
             translator.translate(dictionary[k_description], dest='ru').text]
             if str(dictionary[k_amount])[0] == '-':
-                inter_list += [ru.INCOME]
+                inter_list += ['расход']
             else:
-                inter_list += ['income']
+                inter_list += ['доход']
             exit_list.append(inter_list)
 
     else:
@@ -137,9 +141,9 @@ def import_financial_data(filename: str) -> list:
             inter_list = [dictionary[k_date], float(dictionary[k_amount]),
                           dictionary[k_description]]
             if str(dictionary[k_amount])[0] == '-':
-                inter_list += [ru.INCOME]
+                inter_list += ['расход']
             else:
-                inter_list += ['income']
+                inter_list += ['доход']
             exit_list.append(inter_list)
 
     return exit_list
