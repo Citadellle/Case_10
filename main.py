@@ -192,7 +192,7 @@ def categorize_all_transactions(transactions: list) -> list:
     
     for trans in transactions:       
         date, amount, description, trans_type = trans[0], trans[1], trans[2], trans[3]
-        if trans_type = 'income':
+        if trans_type = ru.INCOME:
             continue
         category = categorize_transaction(description, categories)
         
