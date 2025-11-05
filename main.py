@@ -2,7 +2,6 @@ import csv
 import json
 from datetime import datetime
 import tqdm
-from googletrans import Translator
 import ru_local as ru
 
 
@@ -79,7 +78,6 @@ def read_json_file(filename: str) -> list:
 
 def import_financial_data(filename: str) -> list:
     import tqdm
-    from googletrans import Translator
     '''
     Function:
     1. Determine the file type by extension (.csv or .json)
@@ -121,30 +119,16 @@ def import_financial_data(filename: str) -> list:
 
     # Loop for generating lists of lists.
     exit_list = []
-    # Language check. If it's English, we translate it on Russian.
-    # Need to initialize an instance of Translator.
-    translator = Translator()
-    if translator.detect(read_data[0][k_description]).lang != 'ru':
-        # Use tqdm for printing status bar.
-        for dictionary in tqdm.tqdm(read_data):
-            inter_list = [dictionary[k_date], float(dictionary[k_amount]),
-            translator.translate(dictionary[k_description], dest='ru').text]
-            if str(dictionary[k_amount])[0] == '-':
-                inter_list += ['расход']
-            else:
-                inter_list += ['доход']
-            exit_list.append(inter_list)
 
-    else:
-        # Use tqdm for printing status bar.
-        for dictionary in tqdm.tqdm(read_data):
-            inter_list = [dictionary[k_date], float(dictionary[k_amount]),
-                          dictionary[k_description]]
-            if str(dictionary[k_amount])[0] == '-':
-                inter_list += ['расход']
-            else:
-                inter_list += ['доход']
-            exit_list.append(inter_list)
+    # Use tqdm for printing status bar.
+    for dictionary in tqdm.tqdm(read_data):
+        inter_list = [dictionary[k_date], float(dictionary[k_amount]),
+                    dictionary[k_description]]
+        if str(dictionary[k_amount])[0] == '-':
+            inter_list += ['расход']
+        else:
+            inter_list += ['доход']
+        exit_list.append(inter_list)
 
     return exit_list
 
