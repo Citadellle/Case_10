@@ -125,9 +125,9 @@ def import_financial_data(filename: str) -> list:
         inter_list = [dictionary[k_date], float(dictionary[k_amount]),
                     dictionary[k_description]]
         if str(dictionary[k_amount])[0] == '-':
-            inter_list += ['расход']
+            inter_list += [ru.EXPENSE]
         else:
-            inter_list += ['доход']
+            inter_list += [ru.INCOME]
         exit_list.append(inter_list)
 
     return exit_list
