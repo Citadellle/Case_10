@@ -49,7 +49,7 @@ def read_json_file(filename: str) -> list:
     2. Reads a file
     3. Use json.load() to convert
     4. Returns a list of dictionaries
-    
+
     errors:
     FileNotFoundError
     if split(filename, sep='.')[-1] != 'json'
@@ -61,15 +61,15 @@ def read_json_file(filename: str) -> list:
         with open(filename, mode='r', encoding='UTF-8') as file:
             if filename.split(sep='.')[-1] != 'json':
                 return ['File is not json']
-            json_reader = json.load(file)
-            result = list(json_reader['data'])
+        json_reader = json.load(file)
+        result = list(json_reader['data'])
 
             # Check on correctness.
-            if not isinstance(result, list) or not all(isinstance(item, dict)
+        if not isinstance(result, list) or not all(isinstance(item, dict)
                                                        for item in result):
-                return ['Invalid data format: expected list of dictionaries']
+            return ['Invalid data format: expected list of dictionaries']
 
-            return result
+        return result
 
     # In case incorrect name.
     except FileNotFoundError:
@@ -123,11 +123,11 @@ def import_financial_data(filename: str) -> list:
     # Use tqdm for printing status bar.
     for dictionary in tqdm.tqdm(read_data):
         inter_list = [dictionary[k_date], float(dictionary[k_amount]),
-                    dictionary[k_description]]
+                      dictionary[k_description]]
         if str(dictionary[k_amount])[0] == '-':
-            inter_list += [ru.EXPENSE]
+            inter_list += ['расход']
         else:
-            inter_list += [ru.INCOME]
+            inter_list += ['доход']
         exit_list.append(inter_list)
 
     return exit_list
@@ -140,17 +140,17 @@ def create_categories() -> dict:
     """
     return {
         "еда": ["пятерочка", "магнит", "продукты", "еда", "супермаркет", "добрянка",
-                "мария-ра", "ярче", "мясо", "кондитерская", "пекарня", "овощи", "фрукты", 
+                "мария-ра", "ярче", "мясо", "кондитерская", "пекарня", "овощи", "фрукты",
                 "окей", "дикси", "ярмарка", "фермер", "лавка"],
-        "транспорт": ["метро", "автобус", "такси", "бензин", "аренда самоката", "ж/д", 
-                "билет", "дизель", "газ", "поезд", "электричка", "авиабилет",
+        "транспорт": ["метро", "автобус", "такси", "бензин", "аренда самоката", "ж/д",
+                      "билет", "дизель", "газ", "поезд", "электричка", "авиабилет",
                       "аэрофлот", "велосипед", "газель"],
         "развлечения": ["кино", "атракцион", "выступление", "концерт", "театр", "выставка",
                         "боулинг", "квест", "игровая", ],
-        "здоровье": ["аптека", "врач", "больница", "лекарства", "стоматология", 
+        "здоровье": ["аптека", "врач", "больница", "лекарства", "стоматология",
                      "поликлиника", "анализы", "стоматология", "зуб", "лечение", "медицин",
-                     "диагностика", "инвитро", "хеликс", "лаборатория",  "очки", "линзы"],
-        "одежда": ["одежда", "обувь", "wildberries", "ozon", "спортмастер", "zolla", 
+                     "диагностика", "инвитро", "хеликс", "лаборатория", "очки", "линзы"],
+        "одежда": ["одежда", "обувь", "wildberries", "ozon", "спортмастер", "zolla",
                    "o'stin", "adidas", "Rieker", "виктор", "lacoste", "brand", "befree",
                    "футболка", "штаны", "носки", "рубашка", "zara", "h&m", "bershka"],
         "быт": ["хозтовары", "бытовая техника", "мебель", "порошок", "средство для стирки", "мыло", "шампунь",
@@ -169,12 +169,12 @@ def create_categories() -> dict:
 def categorize_transaction(description: str, categories: dict) -> str:
     """
     Reduce the description to lowercase
-    Check if a keyword is included in the description.  
+    Check if a keyword is included in the description.
     If found, return the category. If you haven't found it, return "другое"
-    """    
+    """
     description_lower = description.lower()
-      
-    for category, keywords in categories.items():        
+
+    for category, keywords in categories.items():
         for keyword in keywords:
             if keyword in description_lower:
                 return category
@@ -184,18 +184,18 @@ def categorize_all_transactions(transactions: list) -> list:
     """
     Accepts a list of transactions in the format:
         [[date, amount, description, type], ... ]
-    
+
     Returns: [[date, amount, description, type, category], ... ]
     """
     categories = create_categories()
     result = []
-    
-    for trans in transactions:       
+
+    for trans in transactions:
         date, amount, description, trans_type = trans[0], trans[1], trans[2], trans[3]
-        if trans_type = ru.INCOME:
+        if trans_type == 'доход':
             continue
         category = categorize_transaction(description, categories)
-        
+
         new_transaction = [date, amount, description, trans_type, category]
         result.append(new_transaction)
 
@@ -341,11 +341,11 @@ def analyze_by_time(transactions_list) -> dict:
 def analyze_historical_spending(transactions: list) -> dict:
     '''
     Analyzes historical financial transactions and returns spending statistics.
-    
+
     Args:
         transactions (list): List of transactions where each transaction is a list containing:
                             [amount, description, date, type, category]
-    
+
     Returns:
         dict: Dictionary containing:
             - 'average costs': Average monthly expenses by category
@@ -372,9 +372,8 @@ def analyze_historical_spending(transactions: list) -> dict:
                     expenses_month_for_category[category] += expense
                 else:
                     expenses_month_for_category[category] = expense
-        
-        months_data[month_number] = expenses_month_for_category
 
+        months_data[month_number] = expenses_month_for_category
 
     expenses_per_category = {}
     for month in months_data:
@@ -387,29 +386,24 @@ def analyze_historical_spending(transactions: list) -> dict:
                 expenses_per_category[category] += expense_by_category
             else:
                 expenses_per_category[category] = expense_by_category
-    
 
     average_expenses_by_category_per_month = {}
     for category in expenses_per_category:
         average_expenses_by_category_per_month[category] = \
             round(expenses_per_category[category] / 12, 2)
-        
-    
+
     expenses_per_category_sorted = sorted(expenses_per_category.items(),
-                                          key= lambda i: i[1],
-                                          reverse= True)
+                                          key=lambda i: i[1],
+                                          reverse=True)
     top_3_category = []
     for i in range(3):
         top_3_category.append(expenses_per_category_sorted[i][0])
-    
-
 
     expenses_by_month = []
     for month in months_data:
         month_data = months_data[month]
         expense_per_month = sum(list(month_data.values()))
         expenses_by_month.append(expense_per_month)
-        
 
     seasons = {
         'winter': [12, 1, 2],
@@ -444,15 +438,14 @@ def analyze_historical_spending(transactions: list) -> dict:
                 seasonal_data['autumn'] = expense_by_month
 
     seasonal_data_sorted = sorted(seasonal_data.items(),
-                                  key= lambda i: i[1])
+                                  key=lambda i: i[1])
     max_exp, max_exp_name = seasonal_data_sorted[-1][1], seasonal_data_sorted[-1][0]
     min_exp, min_exp_name = seasonal_data_sorted[0][1], seasonal_data_sorted[0][0]
     seasonal_patterns = (f'{ru.PR_SEASON_PAT_HIGH_COSTS} {max_exp_name} {ru.PR_SEASON_PAT_EQUAL} {max_exp}',
                          f'{ru.PR_SEASON_PAT_SMALL_COSTS} {min_exp_name} {ru.PR_SEASON_PAT_EQUAL} {min_exp}')
 
-
     max_exp_category = expenses_per_category_sorted[0]
-    several_exp_category = expenses_per_category_sorted[len(expenses_per_category_sorted)//2]
+    several_exp_category = expenses_per_category_sorted[len(expenses_per_category_sorted) // 2]
     recommended_decrease = ((max_exp_category[1] - several_exp_category[1]) \
                             / max_exp_category[1]) * 100
 
@@ -460,22 +453,22 @@ def analyze_historical_spending(transactions: list) -> dict:
                                     f'{ru.PR_BY} {round(recommended_decrease, 2)}%')
 
     return {
-        'average costs' : average_expenses_by_category_per_month,
-        'seasonal patterns' : seasonal_patterns,
-        'biggest expenses' : top_3_category,
-        'recommendations' : recommendations_for_planning,
-        'category data by month' : months_data
-            }
+        'average costs': average_expenses_by_category_per_month,
+        'seasonal patterns': seasonal_patterns,
+        'biggest expenses': top_3_category,
+        'recommendations': recommendations_for_planning,
+        'category data by month': months_data
+    }
 
 
 def create_budget_template(time_stats: dict, analysis: dict) -> dict:
     '''
     Creates a budget template based on historical spending analysis.
-    
+
     Args:
         time_stats (dict): Time-based statistics containing income and expense data
         analysis (dict): Analysis data from analyze_historical_spending function
-    
+
     Returns:
         dict: Budget allocation percentages for three categories:
             - 1: Essential expenses (housing, utilities, food, transport, health)
@@ -492,11 +485,11 @@ def create_budget_template(time_stats: dict, analysis: dict) -> dict:
         saving = income - expense
 
         saving_dict[month] = saving
-    
+
     budget_allocation_percentage = {1: 0, 2: 0, 3: 0}
     for month in months_data:
         month_data = months_data[month]
-        
+
         for category in month_data:
             data = month_data[category]
             if category in ['жилье', 'быт', 'еда', 'транспорт', 'здоровье']:
@@ -505,22 +498,23 @@ def create_budget_template(time_stats: dict, analysis: dict) -> dict:
                 budget_allocation_percentage[2] += data
 
         budget_allocation_percentage[3] += saving_dict[month]
-    
-    return budget_allocation_percentage    
+
+    return budget_allocation_percentage
+
 
 def compare_budget_vs_actual(budget: dict) -> bool:
     '''
     Compares actual budget allocation with recommended percentages.
-    
+
     Args:
         budget (dict): Budget allocation dictionary with three categories:
                       - 1: Essential expenses percentage
-                      - 2: Non-essential expenses percentage  
+                      - 2: Non-essential expenses percentage
                       - 3: Savings percentage
-    
+
     Returns:
         bool: True if budget allocation is outside recommended ranges, False otherwise
-    
+
     Recommended ranges:
         - Category 1 (Essentials): 45-55%
         - Category 2 (Non-essentials): 25-35%
@@ -532,7 +526,7 @@ def compare_budget_vs_actual(budget: dict) -> bool:
 
     for i in budget:
         shares[i] = round(budget[i] / amount, 2) * 100
-    
+
     if shares[1] not in [i for i in range(45, 56)]:
         error = True
     if shares[2] not in [i for i in range(25, 36)]:
@@ -542,10 +536,11 @@ def compare_budget_vs_actual(budget: dict) -> bool:
 
     return error
 
-def print_report(stats: list, 
+
+def print_report(stats: list,
                  category_stats: list,
                  time_stats: list,
-                 analysis: dict, 
+                 analysis: dict,
                  budget: dict
                  ) -> None:
     '''
@@ -559,8 +554,8 @@ def print_report(stats: list,
           f'{ru.PR_EXPENSE}: {stats[ru.EXPENSE]} {ru.PR_RUB}',
           f'{ru.PR_BALANCE} {stats[ru.BALANCE]} {ru.PR_RUB}',
           f'{ru.PR_NUM_TRANS} {stats[ru.TRANSACTIONS_QUANTITY]}',
-          sep = '\n')
-    
+          sep='\n')
+
     print(ru.PR_CATEGORY_EXPENSES)
     for category in category_stats:
         print(f'{ru.PR_CATEGORY} {category}')
@@ -568,7 +563,7 @@ def print_report(stats: list,
               f'{ru.PR_TRANSACTION_COUNT}: {category_stats[category][1]}',
               f'{ru.PR_PERCENT_OF_TOTAL}: {category_stats[category][2]}',
               sep='\n')
-        
+
     print(ru.PR_MONTHLY_EXPENSES)
     for month in time_stats:
         print(f'{ru.PR_MONTH} {month}')
@@ -576,7 +571,7 @@ def print_report(stats: list,
               f'{ru.PR_EXPENSES}: {time_stats[month][ru.INCOME]}',
               f'{ru.PR_POPULAR_CATEGORIES}: {time_stats[month][ru.POPULAR_CATEGORIES]}',
               sep='\n')
-    
+
     print(ru.PR_HISTORICAL_ANALYSIS)
     print(f'{ru.PR_AVERAGE_COSTS}: {analysis['average costs']}',
           f'{ru.PR_SEASONAL_PATTERNS}: {analysis['seasonal patterns']}',
@@ -585,63 +580,62 @@ def print_report(stats: list,
           sep='\n')
 
     print(ru.PR_BUDGET,
-      ru.PR_BUDGET_DISTRIBUTION,
-      ru.PR_BUDGET_ESSENTIALS,
-      ru.PR_BUDGET_LIFESTYLE,
-      ru.PR_BUDGET_SAVINGS,
-      sep='\n')
-                     
+          ru.PR_BUDGET_DISTRIBUTION,
+          ru.PR_BUDGET_ESSENTIALS,
+          ru.PR_BUDGET_LIFESTYLE,
+          ru.PR_BUDGET_SAVINGS,
+          sep='\n')
+
     if budget:
         print(ru.PR_BUDGET_SUCCESS)
     else:
         print(ru.PR_BUDGET_FAILURE)
 
 
-
 def main():
     '''
     The main function of the program is the accounting of income, expenses, analysis and budget planning.
-    
+
     The function performs a sequence of actions according to 4 roles:
     1. Imports the data file and brings it to a format convenient for processing
     2. Processes the received data and assigns a category to each expense transaction
     3. Performs basic data analysis: total income, total expenses, balance, number of transactions. Detailed analysis by month and category.
     4. Performs a detailed analysis of the data: average expenses, seasonal patterns, categories with the largest expenses. Output of recommendations for the user. Calculation of the recommended budget.
-    
-    
+
+
     Functions used:
     - import_financial_data(): importing data and converting it to a format convenient for processing.
-    
+
     - categorize_all_transactions(): Transaction analysis and categorization.
-    
+
     - calculate_basic_stats(): calculation of total income, total expense, balance, number of transactions.
     - calculate_by_category(): Calculates the amount of expenses, the number of transactions, and the percentage of total expenses for each category.
     - analyze_by_time(): Calculates the amount of expenses, the number of transactions, and the percentage of total expenses for each month.
-    
+
     - analyze_historical_spending(): calculation of average monthly expenses, identification of seasonal patterns, identification of 3 categories with the largest expenses, return of recommendations for planning.
     - create_budget_template(): calculating and returning savings, returning the budget template.
     - compare_budget_vs_actual(): determination of user satisfaction in the budget and return of data on penalties to the budget.
-    
+
     - print_report(): beautiful design and return of analyzed data.
     '''
-    
+
     # 1. Role 1: Importing data.
     transactions = import_financial_data(input('enter file name -->'))
-    
-    #2. Role 2: Classify transactions.
+
+    # 2. Role 2: Classify transactions.
     categorized_transactions = categorize_all_transactions(transactions)
-    
+
     # 3. Role 3: Analyzing statistics.
     stats = calculate_basic_stats(categorized_transactions)
     category_stats = calculate_by_category(categorized_transactions)
     time_stats = analyze_by_time(categorized_transactions)
-    
-    #4. Role 4: Budget planning.
+
+    # 4. Role 4: Budget planning.
     analysis = analyze_historical_spending(categorized_transactions)
     budget = create_budget_template(time_stats, analysis)
     report_budget = compare_budget_vs_actual(budget)
 
-    #We display the results.
+    # We display the results.
     print_report(stats, category_stats, time_stats, analysis, report_budget)
 
 
