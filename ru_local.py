@@ -1,3 +1,9 @@
+INCOME = 'доход'
+EXPENSE = 'расход'
+BALANCE = 'баланс'
+TRANSACTIONS_QUANTITY = 'количество транзакций'
+POPULAR_CATEGORIES = 'популярные категории'
+
 PR_SEASON_PAT_HIGH_COSTS = 'Наибольшие затраты наблюдаются в сезон'
 PR_SEASON_PAT_SMALL_COSTS = 'Наименьшие затраты наблюдаются в сезон'
 PR_SEASON_PAT_EQUAL = 'и равны'
@@ -7,10 +13,10 @@ PR_BY = 'на'
 
 # Headlines
 PR_FINANCIAL_REPORT = '=== ФИНАНСОВЫЙ ОТЧЕТ ==='
-PR_KEY_INDICATORS = 'ОСНОВНЫЕ ПОКАЗАТЕЛИ:'
-PR_CATEGORY_EXPENSES = 'РАСХОДЫ ПО КАТЕГОРИЯМ:'
-PR_MONTHLY_EXPENSES = 'РАСХОДЫ ПО МЕСЯЦАМ:'
-PR_HISTORICAL_ANALYSIS = 'АНАЛИЗ ИСТОРИЧЕСКИХ ДАННЫХ'
+PR_KEY_INDICATORS = '=== ОСНОВНЫЕ ПОКАЗАТЕЛИ ==='
+PR_CATEGORY_EXPENSES = '=== РАСХОДЫ ПО КАТЕГОРИЯМ ==='
+PR_MONTHLY_EXPENSES = '=== РАСХОДЫ ПО МЕСЯЦАМ ==='
+PR_HISTORICAL_ANALYSIS = '=== АНАЛИЗ ИСТОРИЧЕСКИХ ДАННЫХ ==='
 PR_BUDGET = 'БЮДЖЕТ'
 
 # Basic terms
