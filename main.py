@@ -167,43 +167,37 @@ def create_categories() -> dict:
 
 
 def categorize_transaction(description: str, categories: dict) -> str:
-    '''
+    """
     Reduce the description to lowercase
-    Check if a keyword is included in the description.
-    If found, return the category. If you haven't found it, return 'другое'
-    '''
+    Check if a keyword is included in the description.  
+    If found, return the category. If you haven't found it, return "другое"
+    """    
     description_lower = description.lower()
-
-    for keyword in categories.items():
-        if keyword in description_lower:
-            return
-    # If code didn't find category.
-    else:
-        return 'другое'
+      
+    for category, keywords in categories.items():        
+        for keyword in keywords:
+            if keyword in description_lower:
+                return category
 
 
 def categorize_all_transactions(transactions: list) -> list:
-    '''
+    """
     Accepts a list of transactions in the format:
         [[date, amount, description, type], ... ]
-
+    
     Returns: [[date, amount, description, type, category], ... ]
-    '''
+    """
     categories = create_categories()
     result = []
-
-    # Add in lists of list category item
-    for trans in transactions:
-        date, amount, description, trans_type = (trans[0], trans[1], trans[2],
-                                                 trans[3])
-        if trans_type == ru.INCOME:
+    
+    for trans in transactions:       
+        date, amount, description, trans_type = trans[0], trans[1], trans[2], trans[3]
+        if trans_type = 'income':
             continue
         category = categorize_transaction(description, categories)
-
+        
         new_transaction = [date, amount, description, trans_type, category]
         result.append(new_transaction)
-
-    return result
 
 
 def calculate_basic_stats(transactions_list: list) -> dict:
