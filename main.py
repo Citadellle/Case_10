@@ -185,7 +185,8 @@ def categorize_transaction(description: str, categories: dict) -> str:
         for keyword in keywords:
             if keyword in description_lower:
                 return category
-
+    return "другое"
+  
 
 def categorize_all_transactions(transactions: list) -> list:
     """
