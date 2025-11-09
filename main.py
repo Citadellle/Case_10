@@ -200,10 +200,7 @@ def categorize_all_transactions(transactions: list) -> list:
 
     for trans in transactions:
         date, amount, description, trans_type = trans[0], trans[1], trans[2], trans[3]
-        if trans_type == 'доход':
-            result.append([date, amount, description, trans_type, "доход"])
-        else:
-            category = categorize_transaction(description, categories)
+        category = categorize_transaction(description, categories)
 
         new_transaction = [date, amount, description, trans_type, category]
         result.append(new_transaction)
