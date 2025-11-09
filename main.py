@@ -205,8 +205,9 @@ def categorize_all_transactions(transactions: list) -> list:
 
         new_transaction = [date, amount, description, trans_type, category]
         result.append(new_transaction)
+    return result
 
-
+    
 def calculate_basic_stats(transactions_list: list) -> dict:
     '''
     This function calculates the total income and expenses,
