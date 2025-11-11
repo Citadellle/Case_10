@@ -361,106 +361,142 @@ def analyze_historical_spending(transactions: list) -> dict:
             - 'recommendations': Budget optimization recommendations
             - 'category data by month': Monthly spending data organized by category
     '''
-    trans_by_month = sort_by_month(transactions)
+
+    # Получаем данные о транзакциях по месяцам. Данные в виде: 
+    # {номер месяца : [[первая транзакция], [вторая транзакция], ...], }
+    all_transactions_by_months = sort_by_month(transactions)
+
+    #Количество анализируемых месяцев
+    number_of_months = len(all_transactions_by_months)
+
+    # Проходимся по всем данным за каждый месяц. Объединяем данные о транзакциях в одинаковых категориях.
+    # Словарь с данными, приведенными к нужному виду выглядит как:
+    # {номер месяца : {категория_1 : траты, категория_2 : траты, ...}, ...}
     months_data = {}
+    for month_number in all_transactions_by_months:
+        # Транзакции за месяц: [[первая транзация], [вторая транзация], ...]
+        month_data = all_transactions_by_months[month_number]
 
-    for month_number in trans_by_month:
-        month_data = trans_by_month[month_number]
-
-        expenses_month_for_category = {}
+        expenses_month_for_categories = {}
 
         for transaction in month_data:
-            category = transaction[4]
-            expense = transaction[1]
+            expense_val = transaction[1]
             transaction_type = transaction[3]
+            category = transaction[4]
 
-            if transaction_type == ru.INCOME:
-                if category in expenses_month_for_category:
-                    expenses_month_for_category[category] += expense
+            if transaction_type == ru.EXPENSE:
+                if category in expenses_month_for_categories:
+                    expenses_month_for_categories[category] += expense_val
                 else:
-                    expenses_month_for_category[category] = expense
+                    expenses_month_for_categories[category] = expense_val
 
-        months_data[month_number] = expenses_month_for_category
-
-    expenses_per_category = {}
+        months_data[month_number] = expenses_month_for_categories
+    
+    # Суммарные траты в категориях за все время:
+    # {категория_1 : суммарные_траты, категория_2 : суммарные_траты, ...}
+    total_expenses_in_categories = {}
     for month in months_data:
+        # Данные за месяц: {категория_1 : траты, категория_2 : траты, ...}
         month_data = months_data[month]
 
         for category in month_data:
-            expense_by_category = month_data[category]
+            # Траты в одной категории за один месяц
+            expense_in_category = month_data[category]
 
-            if category in expenses_per_category:
-                expenses_per_category[category] += expense_by_category
+            if category in total_expenses_in_categories:
+                total_expenses_in_categories[category] += expense_in_category
             else:
-                expenses_per_category[category] = expense_by_category
-
-    average_expenses_by_category_per_month = {}
-    for category in expenses_per_category:
-        average_expenses_by_category_per_month[category] = \
-            round(expenses_per_category[category] / 12, 2)
-
-    expenses_per_category_sorted = sorted(expenses_per_category.items(),
-                                          key=lambda i: i[1],
-                                          reverse=True)
-    top_3_category = []
+                total_expenses_in_categories[category] = expense_in_category
+    
+    
+    # Средние траты по категориям за месяц:
+    # {категория_1 : средние траты, категория_2 : средние траты, ...}
+    average_expenses_by_category = {}
+    for category in total_expenses_in_categories:
+        average_expenses_by_category[category] = \
+            round(total_expenses_in_categories[category] / number_of_months, 2)
+    
+    # Отсортированные по убыванию суммарные траты в категориях:
+    # [(категория_1 : траты), (категория_2 : траты), ...]
+    total_expenses_in_categories_sorted = sorted(total_expenses_in_categories.items(),
+                                          key= lambda i: i[1],
+                                          reverse= True)
+    
+    # 3 категории с самыми большими тратами:
+    # {категория_1 : траты, категория_2 : траты, категория_3 : траты}
+    top_3_category = {}
     for i in range(3):
-        top_3_category.append(expenses_per_category_sorted[i][0])
+        category = total_expenses_in_categories_sorted[i][0]
+        expense_val = total_expenses_in_categories_sorted[i][1]
+        top_3_category[category] = expense_val
 
-    expenses_by_month = []
+
+    # Общие расходы за каждый месяц:
+    # {месяц_1 : траты, месяц_2 : траты, ...}
+    total_expenses_by_month = {}
     for month in months_data:
         month_data = months_data[month]
         expense_per_month = sum(list(month_data.values()))
-        expenses_by_month.append(expense_per_month)
+        total_expenses_by_month[month] = expense_per_month
 
     seasons = {
-        'winter': [12, 1, 2],
-        'spring': [3, 4, 5],
-        'summer': [6, 7, 8],
-        'autumn': [9, 10, 11]
-    }
+        ru.WINTER: [12, 1, 2],
+        ru.SPRING: [3, 4, 5],
+        ru.SUMMER: [6, 7, 8],
+        ru.AUTUMN: [9, 10, 11]
+        }
 
+    # Общие траты за сезоны:
+    # {Лето : траты, Весна : траты, ...}
     seasonal_data = {}
-    i = 0
-    for expense_by_month in expenses_by_month:
-        i += 1
-        if i in seasons['winter']:
-            if 'winter' in seasonal_data:
-                seasonal_data['winter'] += expense_by_month
+    for month in total_expenses_by_month:
+        expense_by_month = total_expenses_by_month[month]
+        if month in seasons[ru.WINTER]:
+            if ru.WINTER in seasonal_data:
+                seasonal_data[ru.WINTER] += expense_by_month
             else:
-                seasonal_data['winter'] = expense_by_month
-        elif i in seasons['spring']:
-            if 'spring' in seasonal_data:
-                seasonal_data['spring'] += expense_by_month
+                seasonal_data[ru.WINTER] = expense_by_month
+        elif month in seasons[ru.SPRING]:
+            if ru.SPRING in seasonal_data:
+                seasonal_data[ru.SPRING] += expense_by_month
             else:
-                seasonal_data['spring'] = expense_by_month
-        elif i in seasons['summer']:
-            if 'summer' in seasonal_data:
-                seasonal_data['summer'] += expense_by_month
+                seasonal_data[ru.SPRING] = expense_by_month
+        elif month in seasons[ru.SUMMER]:
+            if ru.SUMMER in seasonal_data:
+                seasonal_data[ru.SUMMER] += expense_by_month
             else:
-                seasonal_data['summer'] = expense_by_month
+                seasonal_data[ru.SUMMER] = expense_by_month
         else:
-            if 'autumn' in seasonal_data:
-                seasonal_data['autumn'] += expense_by_month
+            if ru.AUTUMN in seasonal_data:
+                seasonal_data[ru.AUTUMN] += expense_by_month
             else:
-                seasonal_data['autumn'] = expense_by_month
+                seasonal_data[ru.AUTUMN] = expense_by_month
+    
 
+    # Общие траты за сезоны, отсортированные по убыванию
     seasonal_data_sorted = sorted(seasonal_data.items(),
-                                  key=lambda i: i[1])
-    max_exp, max_exp_name = seasonal_data_sorted[-1][1], seasonal_data_sorted[-1][0]
-    min_exp, min_exp_name = seasonal_data_sorted[0][1], seasonal_data_sorted[0][0]
-    seasonal_patterns = (f'{ru.PR_SEASON_PAT_HIGH_COSTS} {max_exp_name} {ru.PR_SEASON_PAT_EQUAL} {max_exp}',
-                         f'{ru.PR_SEASON_PAT_SMALL_COSTS} {min_exp_name} {ru.PR_SEASON_PAT_EQUAL} {min_exp}')
+                                  key=lambda i: i[1],
+                                  reverse= True)
+    
+    # Величина максимальных трат, название сезона с данной величиной
+    max_exp, max_exp_name = seasonal_data_sorted[0][1], seasonal_data_sorted[0][0]
+    # Величина минимальных трат, название сезона с данной величиной
+    min_exp, min_exp_name = seasonal_data_sorted[-1][1], seasonal_data_sorted[-1][0]
 
-    max_exp_category = expenses_per_category_sorted[0]
-    several_exp_category = expenses_per_category_sorted[len(expenses_per_category_sorted) // 2]
+    seasonal_patterns = [(max_exp_name, max_exp), (min_exp_name, min_exp)]
+
+    # Категория с максимальными тратами: (категория, траты)
+    max_exp_category = total_expenses_in_categories_sorted[0]
+    #Категория со средними затратами: (категория, траты)
+    several_exp_category = total_expenses_in_categories_sorted[len(total_expenses_in_categories_sorted) // 2]
+    # Рекомендуемое уменьшение трат для категории с максимальными тратами
     recommended_decrease = ((max_exp_category[1] - several_exp_category[1]) \
                             / max_exp_category[1]) * 100
 
-    recommendations_for_planning = (f'{ru.PR_RECOMMEND_PLAN} {max_exp_category[0]} ' \
-                                    f'{ru.PR_BY} {round(recommended_decrease, 2)}%')
+    recommendations_for_planning = (max_exp_category[0], round(recommended_decrease, 2))
 
     return {
-        'average costs': average_expenses_by_category_per_month,
+        'average costs': average_expenses_by_category,
         'seasonal patterns': seasonal_patterns,
         'biggest expenses': top_3_category,
         'recommendations': recommendations_for_planning,
@@ -482,27 +518,34 @@ def create_budget_template(time_stats: dict, analysis: dict) -> dict:
             - 2: Non-essential expenses (entertainment, clothing, education)
             - 3: Savings
     '''
+    # Словарь с данными трат в категориях по месяцам:
+    # {номер месяца : {категория_1 : траты, категория_2 : траты, ...}, ...}
     months_data = analysis['category data by month']
+    
+    # time_stats - словарь с данным за каждый месяц:
+    # {номер_месяца : {доход : значени, расход : значение, популярные категории : список}, ...}
 
+    # Сбережения за каждый месяц
     saving_dict = {}
     for month in time_stats:
-        info_month = time_stats[month]
-        income = info_month[ru.INCOME]
-        expense = info_month[ru.EXPENSE]
+        data_month = time_stats[month]
+        income = data_month[ru.INCOME]
+        expense = data_month[ru.EXPENSE]
         saving = income - expense
 
         saving_dict[month] = saving
 
+    # Распределение бюджета на 3 укрупненные категории
     budget_allocation_percentage = {1: 0, 2: 0, 3: 0}
     for month in months_data:
         month_data = months_data[month]
 
         for category in month_data:
-            data = month_data[category]
+            value = month_data[category]
             if category in ['жилье', 'быт', 'еда', 'транспорт', 'здоровье']:
-                budget_allocation_percentage[1] += data
+                budget_allocation_percentage[1] += value
             if category in ['развлечения', 'одежда', 'образование']:
-                budget_allocation_percentage[2] += data
+                budget_allocation_percentage[2] += value
 
         budget_allocation_percentage[3] += saving_dict[month]
 
@@ -541,7 +584,7 @@ def compare_budget_vs_actual(budget: dict) -> bool:
     if shares[3] not in [i for i in range(15, 25)]:
         error = True
 
-    return error
+    return (error, shares)
 
 
 def print_report(stats: list,
@@ -554,14 +597,14 @@ def print_report(stats: list,
     Beautiful design and print of analyzed data.
     '''
 
-    print(ru.PR_FINANCIAL_REPORT)
+    print(ru.PR_FINANCIAL_REPORT, end= '\n\n')
 
     print(ru.PR_KEY_INDICATORS,
           f'{ru.PR_INCOME} {stats[ru.INCOME]} {ru.PR_RUB}',
           f'{ru.PR_EXPENSE}: {stats[ru.EXPENSE]} {ru.PR_RUB}',
           f'{ru.PR_BALANCE} {stats[ru.BALANCE]} {ru.PR_RUB}',
           f'{ru.PR_NUM_TRANS} {stats[ru.TRANSACTIONS_QUANTITY]}',
-          sep='\n')
+          sep='\n', end= '\n\n')
 
     print(ru.PR_CATEGORY_EXPENSES)
     for category in category_stats:
@@ -569,22 +612,40 @@ def print_report(stats: list,
         print(f'{ru.PR_EXPENSES}: {category_stats[category][0]}',
               f'{ru.PR_TRANSACTION_COUNT}: {category_stats[category][1]}',
               f'{ru.PR_PERCENT_OF_TOTAL}: {category_stats[category][2]}',
-              sep='\n')
+              sep=', ', end= '\n\n')
 
     print(ru.PR_MONTHLY_EXPENSES)
     for month in time_stats:
         print(f'{ru.PR_MONTH} {month}')
-        print(f'{ru.PR_INCOME}: {time_stats[month][ru.INCOME]}',
-              f'{ru.PR_EXPENSES}: {time_stats[month][ru.INCOME]}',
+        print(f'{ru.PR_INCOMES}: {time_stats[month][ru.INCOME]}',
+              f'{ru.PR_EXPENSES}: {time_stats[month][ru.EXPENSE]}',
               f'{ru.PR_POPULAR_CATEGORIES}: {time_stats[month][ru.POPULAR_CATEGORIES]}',
-              sep='\n')
+              sep='\n', end= '\n\n')
 
     print(ru.PR_HISTORICAL_ANALYSIS)
-    print(f'{ru.PR_AVERAGE_COSTS}: {analysis['average costs']}',
-          f'{ru.PR_SEASONAL_PATTERNS}: {analysis['seasonal patterns']}',
-          f'{ru.PR_BIGGEST_EXPENSES}: {analysis['biggest expenses']}',
-          f'{ru.PR_RECOMMENDATIONS}: {analysis['recommendations']}',
-          sep='\n')
+    print(f'{ru.PR_AVERAGE_COSTS}:')
+    for category in analysis['average costs']:
+        value = analysis['average costs'][category]
+        print(f'{category} : {value}')
+    print()
+        
+    print(f'{ru.PR_SEASONAL_PATTERNS}:')
+    print(f'{ru.PR_SEASON_PAT_HIGH_COSTS} {analysis['seasonal patterns'][0][0]}',
+          f'{ru.PR_SEASON_PAT_EQUAL} {analysis['seasonal patterns'][0][1]} {ru.PR_RUB}')
+    print(f'{ru.PR_SEASON_PAT_SMALL_COSTS} {analysis['seasonal patterns'][1][0]}',
+          f'{ru.PR_SEASON_PAT_EQUAL} {analysis['seasonal patterns'][1][1]} {ru.PR_RUB}',
+          end= '\n\n')
+    
+    print(f'{ru.PR_BIGGEST_EXPENSES}:')
+    for category in analysis['biggest expenses']:
+        value = analysis['biggest expenses'][category]
+        print(f'{category} : {value}')
+    print()
+
+    print(f'{ru.PR_RECOMMENDATIONS}:')
+    print(f'{ru.PR_RECOMMEND_PLAN} {analysis['recommendations'][0]} ' \
+          f'{ru.PR_BY} {analysis['recommendations'][1]}%',
+          end= '\n\n')
 
     print(ru.PR_BUDGET,
           ru.PR_BUDGET_DISTRIBUTION,
@@ -593,10 +654,14 @@ def print_report(stats: list,
           ru.PR_BUDGET_SAVINGS,
           sep='\n')
 
-    if budget:
+    if budget[0]:
         print(ru.PR_BUDGET_SUCCESS)
     else:
         print(ru.PR_BUDGET_FAILURE)
+        print(f'{ru.PR_BUDGET_CATEGORY_1} {budget[1]}',
+              f'{ru.PR_BUDGET_CATEGORY_2} {budget[2]}',
+              f'{ru.PR_BUDGET_CATEGORY_3} {budget[3]}',
+              sep= '\n')
 
 
 def main():
