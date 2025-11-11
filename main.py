@@ -49,7 +49,7 @@ def read_json_file(filename: str) -> list:
     2. Reads a file
     3. Use json.load() to convert
     4. Returns a list of dictionaries
-
+    
     errors:
     FileNotFoundError
     if split(filename, sep='.')[-1] != 'json'
@@ -61,39 +61,80 @@ def read_json_file(filename: str) -> list:
         with open(filename, mode='r', encoding='UTF-8') as file:
             if filename.split(sep='.')[-1] != 'json':
                 return ['File is not json']
-        json_reader = json.load(file)
-        result = list(json_reader['data'])
+            json_reader = json.load(file)
+            result = list(json_reader['data'])
 
             # Check on correctness.
-        if not isinstance(result, list) or not all(isinstance(item, dict)
+            if not isinstance(result, list) or not all(isinstance(item, dict)
                                                        for item in result):
-            return ['Invalid data format: expected list of dictionaries']
+                return ['Invalid data format: expected list of dictionaries']
 
-        return result
+            return result
 
     # In case incorrect name.
     except FileNotFoundError:
         return ['File is not found']
 
 
+def inter_list_en(dictionary: dict, k_date: str, k_amount: str,
+                  k_description: str, k_category: str) -> list:
+    from googletrans import Translator
+    translator = Translator()
+    inter_list = [dictionary[k_date], float(dictionary[k_amount]),
+                  translator.translate(dictionary[k_description],
+                                       dest='ru').text]
+    if str(dictionary[k_amount])[0] == '-':
+        inter_list += ['расход']
+    else:
+        inter_list += ['доход']
+    # Add category information.
+    inter_list.append(translator.translate(dictionary[k_category],
+                                           dest='ru').text)
+    return inter_list
+
+
 def import_financial_data(filename: str) -> list:
+    import time
     import tqdm
+    from googletrans import Translator
+    import ru_local as ru
     '''
     Function:
     1. Determine the file type by extension (.csv or .json)
     2. Call the appropriate read function
     3. Check that the data has the correct structure
     4. Return a list of transactions in a list of lists format
-
+    5. If dataset is English, function take description information
+    from dataset.
+    
+    input data example:
+    
         "date": "2024-01-15",
         "amount": -1500.50,
         "description": "Продукты в Пятерочке",
         "type": "расход"
 
+
         "date": "2024-01-10",
         "amount": 50000.00,
         "description": "Зарплата",
         "type": "доход"
+    
+    exit data example (lang='en'):
+    ['2024-06-11T10:37:22', -54.23, 
+    'Покупка продуктов FreshMart - еженедельные поставки', 
+    'расход', 'супермаркет']
+    
+    exit data example (lang='ru'):
+    ['2024-01-18', -780.9, 'Продукты в Магните', 'расход']
+    ================================
+    
+    !Notice!
+    please, for correct work this function, use this version of googletrans:
+    Name: googletrans
+    Version: 4.0.0rc1
+    Summary: Free Google Translate API for Python.
+    Home-page: https://github.com/ssut/py-googletrans
     '''
 
     if filename.split(sep='.')[-1] == 'json':
@@ -107,6 +148,8 @@ def import_financial_data(filename: str) -> list:
     k_amount = ''
     k_date = ''
     k_description = ''
+
+    k_category = ''
     # We run through the first element of the dictionary,
     # finding the keys we need.
     for need_keys in read_data[0].keys():
@@ -116,23 +159,50 @@ def import_financial_data(filename: str) -> list:
             k_date = need_keys
         if 'description' in need_keys:
             k_description = need_keys
+        if 'category' in need_keys:
+            k_category = need_keys
 
     # Loop for generating lists of lists.
     exit_list = []
+    # Language check. If it's English, we translate it on Russian.
+    # Need to initialize an instance of Translator.
+    translator = Translator()
+    if translator.detect(read_data[0][k_description]).lang != 'ru':
+        print(ru.PROGRESS_BAR_EN)
+        # Use tqdm for printing status bar.
+        for dictionary in tqdm.tqdm(read_data):
+            try:
+                exit_list.append(inter_list_en(dictionary, k_date, k_amount,
+                                               k_description, k_category))
+            # If Translator have to many request error.
+            except AttributeError:
+                time.sleep(5)
+                print('Too many request\'s on Google translate server.'
+                      '5 seconds pause.')
+                exit_list.append(inter_list_en(dictionary, k_date, k_amount,
+                                               k_description, k_category))
 
-    # Use tqdm for printing status bar.
-    for dictionary in tqdm.tqdm(read_data):
-        inter_list = [dictionary[k_date], float(dictionary[k_amount]),
-                      dictionary[k_description]]
-        if str(dictionary[k_amount])[0] == '-':
-            inter_list += ['расход']
-        else:
-            inter_list += ['доход']
-        exit_list.append(inter_list)
+    else:
+        print(ru.PROGRESS_BAR_RU)
+        # Use tqdm for printing status bar.
+        for dictionary in tqdm.tqdm(read_data):
+            inter_list = [dictionary[k_date], float(dictionary[k_amount]),
+                          dictionary[k_description]]
+            if str(dictionary[k_amount])[0] == '-':
+                inter_list += ['расход']
+            else:
+                inter_list += ['доход']
+            exit_list.append(inter_list)
 
     return exit_list
 
 
+lst = import_financial_data('test_data.csv')
+print(lst)
+
+
+
+                      
 def create_categories() -> dict:
     """
     Creates a dictionary of categories: the key is the category name,
@@ -207,6 +277,8 @@ def categorize_all_transactions(transactions: list) -> list:
         new_transaction = [date, amount, description, trans_type, category]
         result.append(new_transaction)
     return result
+
+
 
     
 def calculate_basic_stats(transactions_list: list) -> dict:
@@ -347,6 +419,8 @@ def analyze_by_time(transactions_list) -> dict:
     return month_info
 
 
+
+
 def analyze_historical_spending(transactions: list) -> dict:
     '''
     Analyzes historical financial transactions and returns spending statistics.
@@ -363,7 +437,6 @@ def analyze_historical_spending(transactions: list) -> dict:
             - 'recommendations': Budget optimization recommendations
             - 'category data by month': Monthly spending data organized by category
     '''
-
     # Получаем данные о транзакциях по месяцам. Данные в виде: 
     # {номер месяца : [[первая транзакция], [вторая транзакция], ...], }
     all_transactions_by_months = sort_by_month(transactions)
@@ -410,7 +483,6 @@ def analyze_historical_spending(transactions: list) -> dict:
             else:
                 total_expenses_in_categories[category] = expense_in_category
     
-    
     # Средние траты по категориям за месяц:
     # {категория_1 : средние траты, категория_2 : средние траты, ...}
     average_expenses_by_category = {}
@@ -431,7 +503,6 @@ def analyze_historical_spending(transactions: list) -> dict:
         category = total_expenses_in_categories_sorted[i][0]
         expense_val = total_expenses_in_categories_sorted[i][1]
         top_3_category[category] = expense_val
-
 
     # Общие расходы за каждый месяц:
     # {месяц_1 : траты, месяц_2 : траты, ...}
