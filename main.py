@@ -512,7 +512,7 @@ def analyze_historical_spending(transactions: list) -> dict:
     # Категория с максимальными тратами: (категория, траты)
     max_exp_category = total_expenses_in_categories_sorted[0]
     #Категория со средними затратами: (категория, траты)
-    several_exp_category = total_expenses_in_categories_sorted[len(total_expenses_in_categories_sorted) // 2]
+    several_exp_category = total_expenses_in_categories_sorted[len(total_expenses_in_categories_sorted) // 4]
     # Рекомендуемое уменьшение трат для категории с максимальными тратами
     recommended_decrease = ((max_exp_category[1] - several_exp_category[1]) \
                             / max_exp_category[1]) * 100
