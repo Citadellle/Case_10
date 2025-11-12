@@ -39,7 +39,18 @@ def read_csv_file(filename: str) -> list:
     
 def read_json_file(filename: str) -> list:
     '''
-    Reads JSON file and returns list of dictionaries
+    Function:
+    1. Imports the json module
+    2. Reads a file
+    3. Use json.load() to convert
+    4. Returns a list of dictionaries
+
+    errors:
+    FileNotFoundError
+    if split(filename, sep='.')[-1] != 'json'
+
+    check:
+    right data format - list of dictionaries
     '''
     try:
         # Check file extension
@@ -134,3 +145,4 @@ def import_financial_data(filename: str) -> list:
             inter_list += ['доход']
         exit_list.append(inter_list)
     return exit_list
+
