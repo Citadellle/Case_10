@@ -127,10 +127,11 @@ def analyze_historical_spending(transactions: list) -> dict:
             else:
                 seasonal_data[ru.AUTUMN] = expense_by_month
 
-    # Total expenses by seasons sorted in descending order
+    # Total expenses by seasons sorted in descending order:
+    # [(Summer : expenses), (Spring : expenses), ...]
     seasonal_data_sorted = sorted(seasonal_data.items(),
-                                  key=lambda i: i[1],
-                                  reverse=True)
+                                  key= lambda i: i[1],
+                                  reverse= True)
 
     # Maximum expenses value, season name with this value
     max_exp, max_exp_name = seasonal_data_sorted[0][1], seasonal_data_sorted[0][0]
