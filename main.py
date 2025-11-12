@@ -31,7 +31,7 @@ def print_report(stats: list,
         print(f'{ru.PR_CATEGORY} {category}')
         print(f'{ru.PR_EXPENSES}: {category_stats[category][0]}',
               f'{ru.PR_TRANSACTION_COUNT}: {category_stats[category][1]}',
-              f'{ru.PR_PERCENT_OF_TOTAL}: {category_stats[category][2]}',
+              f'{ru.PR_PERCENT_OF_TOTAL}: {category_stats[category][2]} %',
               sep=', ', end= '\n\n')
 
     print(ru.PR_MONTHLY_EXPENSES)
@@ -112,7 +112,7 @@ def main():
     '''
 
     # 1. Role 1: Importing data.
-    transactions = fdi.import_financial_data(input('enter file name -->'))
+    transactions = fdi.import_financial_data(input(ru.PR_REQUEST))
 
     # 2. Role 2: Classify transactions.
     categorized_transactions = cat.categorize_all_transactions(transactions)
