@@ -22,7 +22,7 @@ def read_csv_file(filename: str) -> list:
     try:
         with (open(filename, mode='r', encoding='UTF-8') as file):
             # Check on correct file extension.
-            if filename.split(sep='.')[-1] != 'csv':
+            if not filename.endswith('.csv'):
                 return ['File is not csv']
             csv_reader = csv.DictReader(file)
             result = [lines for lines in csv_reader]
@@ -145,4 +145,5 @@ def import_financial_data(filename: str) -> list:
             inter_list += ['доход']
         exit_list.append(inter_list)
     return exit_list
+
 
