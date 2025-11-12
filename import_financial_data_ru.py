@@ -36,40 +36,28 @@ def read_csv_file(filename: str) -> list:
     # In case incorrect name.
     except FileNotFoundError:
         return ['File is not found']
-
-
+    
 def read_json_file(filename: str) -> list:
     '''
-    Function:
-    1. Imports the json module
-    2. Reads a file
-    3. Use json.load() to convert
-    4. Returns a list of dictionaries
-
-    errors:
-    FileNotFoundError
-    if split(filename, sep='.')[-1] != 'json'
-
-    check:
-    right data format - list of dictionaries
+    Reads JSON file and returns list of dictionaries
     '''
     try:
+        # Check file extension
+        if not filename.endswith('.json'):
+            return ['File is not json']
+        
         with open(filename, mode='r', encoding='UTF-8') as file:
-            if filename.split(sep='.')[-1] != 'json':
-                return ['File is not json']
-            json_reader = json.load(file)
-            result = list(json_reader['data'])
-
-            # Check on correctness.
-            if not isinstance(result, list) or not all(isinstance(item, dict)
-                                                       for item in result):
+            # Load JSON data directly
+            result = json.load(file)
+            
+            # Validate that data is list of dictionaries
+            if not isinstance(result, list) or not all(isinstance(item, dict) for item in result):
                 return ['Invalid data format: expected list of dictionaries']
-
+            
             return result
-
-    # In case incorrect name.
+    # In case incorrect name. 
     except FileNotFoundError:
-        return ['File is not found']
+        return ['File not found']
 
 
 def import_financial_data(filename: str) -> list:
