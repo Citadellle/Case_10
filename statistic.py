@@ -71,7 +71,7 @@ def calculate_by_category(transactions_list) -> dict:
             total_sum += transactions[1]
             transactions_quantity = len(category_list)
 
-        percent = round(total_sum / total_expenses, 2) * 100
+        percent = round(total_sum / total_expenses * 100, 2)
 
         info = [total_sum, transactions_quantity, percent]
         category_info[category] = info
@@ -136,5 +136,6 @@ def analyze_by_time(transactions_list) -> dict:
                 ru.POPULAR_CATEGORIES: popular_categories}
 
         month_info[month] = info
+
 
     return month_info
