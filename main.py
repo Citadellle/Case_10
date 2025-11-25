@@ -1,5 +1,3 @@
-from calendar import month
-
 import ru_local as ru
 import import_financial_data_ru as fdi
 import catigorize as cat
