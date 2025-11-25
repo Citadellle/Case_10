@@ -26,25 +26,27 @@ def print_report(stats: list,
 
     print(ru.PR_CATEGORY_EXPENSES)
     for category in category_stats:
-        print(f'{ru.PR_CATEGORY} {category}')
-        print(f'{ru.PR_EXPENSES}: {category_stats[category][0]}',
-              f'{ru.PR_TRANSACTION_COUNT}: {category_stats[category][1]}',
-              f'{ru.PR_PERCENT_OF_TOTAL}: {category_stats[category][2]} %',
-              sep=', ', end= '\n\n')
+      print(f'{ru.PR_CATEGORY} {category}')
+      print(f'{ru.PR_EXPENSES}: {category_stats[category][0]}',
+            f'{ru.PR_TRANSACTION_COUNT}: {category_stats[category][1]}',
+            f'{ru.PR_PERCENT_OF_TOTAL}: {category_stats[category][2]} %',
+            sep=', ', end= '\n\n')
 
     print(ru.PR_MONTHLY_EXPENSES)
     for month in time_stats:
-        print(f'{ru.PR_MONTH} {ru.month_ru[month]}')
-        print(f'{ru.PR_INCOMES}: {time_stats[month][ru.INCOME]}',
-              f'{ru.PR_EXPENSES}: {time_stats[month][ru.EXPENSE]}',
-              f'{ru.PR_POPULAR_CATEGORIES}: {time_stats[month][ru.POPULAR_CATEGORIES]}',
-              sep='\n', end= '\n\n')
+      print(f'{ru.PR_MONTH} {ru.month_ru[month]}')
+      print(f'{ru.PR_INCOMES}: {time_stats[month][ru.INCOME]}',
+            f'{ru.PR_EXPENSES}: {time_stats[month][ru.EXPENSE]}',
+            f'{ru.PR_POPULAR_CATEGORIES}: ', end= '')
+      for category in time_stats[month][ru.POPULAR_CATEGORIES]:
+          print(category, end= ' ')
+      print('\n')
 
     print(ru.PR_HISTORICAL_ANALYSIS)
     print(f'{ru.PR_AVERAGE_COSTS}:')
     for category in analysis['average costs']:
-        value = analysis['average costs'][category]
-        print(f'{category} : {value}')
+      value = analysis['average costs'][category]
+      print(f'{category} : {value}')
     print()
         
     print(f'{ru.PR_SEASONAL_PATTERNS}:')
@@ -56,8 +58,8 @@ def print_report(stats: list,
     
     print(f'{ru.PR_BIGGEST_EXPENSES}:')
     for category in analysis['biggest expenses']:
-        value = analysis['biggest expenses'][category]
-        print(f'{category} : {value}')
+      value = analysis['biggest expenses'][category]
+      print(f'{category} : {value}')
     print()
 
     print(f'{ru.PR_RECOMMENDATIONS}:')
@@ -73,13 +75,13 @@ def print_report(stats: list,
           sep='\n')
 
     if budget[0]:
-        print(ru.PR_BUDGET_SUCCESS)
+      print(ru.PR_BUDGET_SUCCESS)
     else:
-        print(ru.PR_BUDGET_FAILURE)
-        print(f'{ru.PR_BUDGET_CATEGORY_1} {budget[1]}',
-              f'{ru.PR_BUDGET_CATEGORY_2} {budget[2]}',
-              f'{ru.PR_BUDGET_CATEGORY_3} {budget[3]}',
-              sep= '\n')
+      print(ru.PR_BUDGET_FAILURE)
+      print(f'{ru.PR_BUDGET_CATEGORY_1} {budget[1]}',
+            f'{ru.PR_BUDGET_CATEGORY_2} {budget[2]}',
+            f'{ru.PR_BUDGET_CATEGORY_3} {budget[3]}',
+            sep= '\n')
 
 
 def main():
